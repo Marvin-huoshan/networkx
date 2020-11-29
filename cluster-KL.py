@@ -968,10 +968,10 @@ if __name__ == '__main__':
     #part_comb(G_dol, 3, 'part-com-3anoymous-dol-3-rdivision.xlsx', 0.5, 0.5)
     #part_comb(G_dol, 4, 'part-com-4anoymous-dol-3-rdivision.xlsx', 0.5, 0.5)
     #part_comb(G_dol, 10, 'part-com-10anoymous-dol-3-rdivision.xlsx', 0.5, 0.5)
-    R_division(G_Email, 3, 'Email')
+    #R_division(G_Email, 3, 'Email')
     #print(nx.number_of_nodes(G_Email))
-    #comb(G_Email, 3, 'Email-3-rdivision.xlsx', 0.5, 0.5)
-    #comb(G_Email, 4, 'Email-3-rdivision.xlsx', 0.5, 0.5)
+    comb(G_Email, 3, 'Email-3-rdivision.xlsx', 0.5, 0.5)
+    comb(G_Email, 4, 'Email-3-rdivision.xlsx', 0.5, 0.5)
     #comb(G_Email, 10, 'Email-3-rdivision.xlsx', 0.5, 0.5)
     #part(G_Email, 'com-3anoymous-Email-3-rdivision.xlsx', 3)
 
