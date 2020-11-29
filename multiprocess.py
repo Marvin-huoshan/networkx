@@ -1,29 +1,22 @@
 from multiprocessing import Pool,Process
-import os
+import os,time,random
 
-def f0(x):
-    return x * x
+def run_proc(name):
+    print('Run child process %s (%s)...' % (name,os.getppid()))
 
-def f1(name):
-    print('hello',name)
-
-def info(title):
-    print(title)
-    print('module name:',__name__)
-    print('parent process:',os.getppid())
-    print('process id',os.getppid())
-
-def f3(name):
-    info('function f')
-    print('hello',name)
+def long_time_task(name):
+    print('Run task %s (%s)...' % (name,os.getppid()))
+    start = time.time()
+    time.sleep(random.random() * 3)
+    end = time.time()
+    print('Task %s run %0.2f seconds.' % (name,(end - start)))
 
 if __name__ == '__main__':
-    #with Pool(5) as p:
-    #    print(p.map(f0,[1,2,3]))
-    #p = Process(target=f1,args=('bob',))
-    #p.start()
-    #p.join()
-    info('main line')
-    p = Process(target=f3,args=('bob',))
-    p.start()
+    print('Parent process %s.' % os.getppid())
+    p = Pool(4)
+    for i in range(5):
+        p.apply_async(long_time_task,args=(i,))
+    print('Waitiong for all subprocess done...')
+    p.close()
     p.join()
+    print('All subprocess done.')
