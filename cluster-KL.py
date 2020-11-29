@@ -395,10 +395,11 @@ def R_division(G,dis,name):
     worksheet.write(0,0,'度差'+str(dis))
     cont1 = 1
     cont2 = 0
+    cont = 0
     while len(list1) != 0:
         worksheet.write(cont1, cont2, '类' + str(cont1))
         tmp = list1[0]
-        while len(tmp1) != 0 and tmp - tmp1[0] <= dis:
+        while len(tmp1) != 0 and tmp - tmp1[0] <= dis and cont2 != 16000:
             cont2 += 1
             worksheet.write(cont1, cont2, tmp2[0])
             tmp2.pop(0)
@@ -947,7 +948,7 @@ if __name__ == '__main__':
     #hist_pict(G_HepPh,'G_HepPh')
     #hist_pict(G_Email,'G_Email')
     #hist_pict()
-    comb(G_1,3,'1-3-rdivision.xlsx',0.5,0.5)
+    #comb(G_1,3,'1-3-rdivision.xlsx',0.5,0.5)
     #comb(G_1,4,'1-3-rdivision.xlsx',0.5,0.5)
     #comb(G_1,10,'1-3-rdivision.xlsx',0.5,0.5)
     #comb(G_1,6,'1-3-rdivision.xlsx',0.5,0.5)p
@@ -967,11 +968,13 @@ if __name__ == '__main__':
     #part_comb(G_dol, 3, 'part-com-3anoymous-dol-3-rdivision.xlsx', 0.5, 0.5)
     #part_comb(G_dol, 4, 'part-com-4anoymous-dol-3-rdivision.xlsx', 0.5, 0.5)
     #part_comb(G_dol, 10, 'part-com-10anoymous-dol-3-rdivision.xlsx', 0.5, 0.5)
-    #R_division(G_Email, 3, 'Email')
+    R_division(G_Email, 3, 'Email')
+    #print(nx.number_of_nodes(G_Email))
     #comb(G_Email, 3, 'Email-3-rdivision.xlsx', 0.5, 0.5)
     #comb(G_Email, 4, 'Email-3-rdivision.xlsx', 0.5, 0.5)
     #comb(G_Email, 10, 'Email-3-rdivision.xlsx', 0.5, 0.5)
-    part(G_Email, 'com-3anoymous-Email-3-rdivision.xlsx', 3)
+    #part(G_Email, 'com-3anoymous-Email-3-rdivision.xlsx', 3)
+
     #part(G_Email, 'com-4anoymous-Email-3-rdivision.xlsx', 4)
     #part(G_Email, 'com-10anoymous-Email-3-rdivision.xlsx', 10)
     #part_comb(G_Email, 3, 'part-com-3anoymous-Email-3-rdivision.xlsx', 0.5, 0.5)
