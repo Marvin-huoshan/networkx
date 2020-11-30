@@ -8,6 +8,7 @@ from sklearn.cluster import KMeans,SpectralClustering
 from sklearn import datasets
 from multiprocessing import Pool,Process
 import os
+from scipy.optimize import root
 
 def same_degree(G,name):
     '''
@@ -924,6 +925,29 @@ def read_sheet(mysheet,worksheet,k):
                 col += 1
             row += 1
 
+def func():
+    sorted_degree_dict = dict(sorted(nx.degree(G_Email), key=lambda x: x[1], reverse=True))
+    # list1 = list(sorted(set(sorted_degree_dict.values()), reverse=True))
+    y = list(sorted(set(sorted_degree_dict.values()), reverse=True))
+    x = [i for i in range(1, len(y) + 1)]
+    f1 = np.polyfit(x, y, 7)
+    print('f1 is:', f1)
+    p1 = np.poly1d(f1)
+    print('p1 is :\n', p1)
+    yvals = p1(x)  # 拟合y值
+    print('yvals is :\n', yvals)
+    # 绘图
+    plot1 = plt.plot(x, y, 's', label='original values')
+    plot2 = plt.plot(x, yvals, 'r', label='polyfit values')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.legend(loc=4)  # 指定legend的位置右下角
+    plt.title('polyfitting')
+    plt.show()
+    solution = root(fun=p1, x0=1)
+    print(solution)
+    print(p1(solution.x[0]))
+
 if __name__ == '__main__':
     G_1 = nx.read_gml('1.gml')
     G_dol = nx.read_gml('dolphins.gml')
@@ -935,9 +959,10 @@ if __name__ == '__main__':
     G_pol = nx.read_gml('polbooks.gml')
     G_HepPh = nx.read_edgelist('CA-HepPh.txt')
     G_HepTh = nx.read_edgelist('CA-HepTh.txt')
-    #G_lj = nx.read_edgelist('/Users/mac/PycharmProjects/networkx/com-lj.ungraph.txt')
+    #G_lj = nx.read_edgelist('com-lj.ungraph.txt')
     G_Email = nx.read_edgelist('Email-Enron.txt')
 
+    #list2 = set(list1[:])
     #hist_pict(G_1,'G_1')
     #hist_pict(G_dol,'G_dol')
     #hist_pict(G_foot,'G_foot')
@@ -953,7 +978,7 @@ if __name__ == '__main__':
     #comb(G_1,3,'1-3-rdivision.xlsx',0.5,0.5)
     #comb(G_1,4,'1-3-rdivision.xlsx',0.5,0.5)
     #comb(G_1,10,'1-3-rdivision.xlsx',0.5,0.5)
-    #comb(G_1,6,'1-3-rdivision.xlsx',0.5,0.5)p
+    #comb(G_1,6,'1-3-rdivision.xlsx',0.5,0.5)
     #node_Gne(G_1,'com-3anoymous-1-3-rdivision.xlsx','1-3anoymous')
     #part(G_1,'com-3anoymous-1-3-rdivision.xlsx',3)
     #part(G_1,'com-4anoymous-1-3-rdivision.xlsx',4)
@@ -987,8 +1012,8 @@ if __name__ == '__main__':
     #p.apply_async(part_comb,args=(G_Email, 3, 'part-com-3anoymous-Email-3-rdivision.xlsx', 0.5, 0.5))
     #p.apply_async(part_comb, args=(G_Email, 4, 'part-com-4anoymous-Email-3-rdivision.xlsx', 0.5, 0.5))
     #p.apply_async(part_comb, args=(G_Email, 10, 'part-com-10anoymous-Email-3-rdivision.xlsx', 0.5, 0.5))
-    part_comb(G_Email,3,'part-com-3anoymous-Email-3-rdivision.xlsx',0.5,0.5)
-    part_comb(G_Email, 4, 'part-com-4anoymous-Email-3-rdivision.xlsx', 0.5, 0.5)
+    #part_comb(G_Email,3,'part-com-3anoymous-Email-3-rdivision.xlsx',0.5,0.5)
+    #part_comb(G_Email, 4, 'part-com-4anoymous-Email-3-rdivision.xlsx', 0.5, 0.5)
     #part_comb(G_Email, 10, 'part-com-10anoymous-Email-3-rdivision.xlsx', 0.5, 0.5)
     #R_division(G_HepPh, 3, 'HepPh')
     #comb(G_kar,3,'kar-3-rdivision.xlsx',0.5,0.5)
@@ -1013,8 +1038,8 @@ if __name__ == '__main__':
     #part_comb(G_HepTh, 3, 'part-com-3anoymous-HepTh-3-rdivision.xlsx', 0.5, 0.5)
     #part_comb(G_HepTh, 4, 'part-com-4anoymous-HepTh-3-rdivision.xlsx', 0.5, 0.5)
     #part_comb(G_HepTh, 10, 'part-com-10anoymous-HepTh-3-rdivision.xlsx', 0.5, 0.5)
-
-
+    #R_division(G_lj)
+    #same_degree(G_lj,'lj')
     #same_degree(G_1,'1')
 
     #node_Gne(G_foot,'foot')
@@ -1082,6 +1107,3 @@ if __name__ == '__main__':
     #node_Gne(G_pol,'pol-1-rdivision.xlsx','pol-1')
     #node_Gne(G_pol,'pol-2-rdivision.xlsx','pol-2')
     #node_Gne(G_pol,'pol-3-rdivision.xlsx','pol-3')
-
-
-
