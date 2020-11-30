@@ -959,7 +959,7 @@ if __name__ == '__main__':
     G_pol = nx.read_gml('polbooks.gml')
     G_HepPh = nx.read_edgelist('CA-HepPh.txt')
     G_HepTh = nx.read_edgelist('CA-HepTh.txt')
-    #G_lj = nx.read_edgelist('com-lj.ungraph.txt')
+    G_lj = nx.read_edgelist('com-lj.ungraph.txt')
     G_Email = nx.read_edgelist('Email-Enron.txt')
 
     #list2 = set(list1[:])
@@ -1007,6 +1007,18 @@ if __name__ == '__main__':
     p.apply_async(part, args=(G_Email, 'com-10anoymous-Email-3-rdivision.xlsx', 10))
     p.close()
     p.join()'''
+    p = Pool(3)
+    p.apply_async(func=comb,args=(G_lj,3,'lj-3-rdivision.xlsx',0.5,0.5))
+    p.apply_async(func=comb, args=(G_lj, 4, 'lj-3-rdivision.xlsx', 0.5, 0.5))
+    p.apply_async(func=comb, args=(G_lj, 10, 'lj-3-rdivision.xlsx', 0.5, 0.5))
+    '''p.apply_async(func=part, args=(G_lj,'com-3anoymous-lj-3-rdivision.xlsx',3))
+    p.apply_async(func=part, args=(G_lj, 'com-3anoymous-lj-3-rdivision.xlsx', 4))
+    p.apply_async(func=part, args=(G_lj, 'com-3anoymous-lj-3-rdivision.xlsx', 10))
+    p.apply_async(func=part_comb, args=(G_lj,3,'part-com-3anoymous-lj-3-rdivision.xlsx',0.5,0.5))
+    p.apply_async(func=part_comb, args=(G_lj, 4, 'part-com-4anoymous-lj-3-rdivision.xlsx', 0.5, 0.5))
+    p.apply_async(func=part_comb, args=(G_lj, 10, 'part-com-10anoymous-lj-3-rdivision.xlsx', 0.5, 0.5))'''
+    p.close()
+    p.join()
     #part(G_Email, 'com-4anoymous-Email-3-rdivision.xlsx', 4)
     #part(G_Email, 'com-10anoymous-Email-3-rdivision.xlsx', 10)
     #p.apply_async(part_comb,args=(G_Email, 3, 'part-com-3anoymous-Email-3-rdivision.xlsx', 0.5, 0.5))
