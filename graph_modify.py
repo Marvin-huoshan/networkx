@@ -56,7 +56,7 @@ if __name__ == '__main__':
     #print(list2)
     subgraph2 = nx.subgraph(G_1,list2)
     #print(nx.graph_edit_distance(subgraph1,subgraph2))
-    print(list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=6)))
+    print(list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=60)))
     print(list(nx.optimize_edit_paths(subgraph1, subgraph2, timeout=120)))
     print(list(nx.optimize_edit_paths(subgraph1, subgraph2, timeout=180)))
     print(list(nx.optimize_edit_paths(subgraph1, subgraph2, timeout=240)))
@@ -65,7 +65,10 @@ if __name__ == '__main__':
     print(list(nx.optimize_edit_paths(subgraph1, subgraph2, timeout=4200)))
     print(list(nx.optimize_edit_paths(subgraph1, subgraph2, timeout=6000)))
     print(list(nx.optimize_edit_paths(subgraph1, subgraph2, timeout=12000)))
-    print(list(nx.optimize_edit_paths(subgraph1, subgraph2)))
+    print(list(nx.optimize_edit_paths(subgraph1, subgraph2, timeout=18000)))
+    print(list(nx.optimize_edit_paths(subgraph1, subgraph2, timeout=24000)))
+    print(list(nx.optimize_edit_paths(subgraph1, subgraph2, timeout=30000)))
+    #print(list(nx.optimize_edit_paths(subgraph1, subgraph2)))
 
 
     #print(nx.optimal_edit_paths(subgraph1,subgraph2))
