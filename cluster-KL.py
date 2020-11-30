@@ -925,28 +925,75 @@ def read_sheet(mysheet,worksheet,k):
                 col += 1
             row += 1
 
-def func():
-    sorted_degree_dict = dict(sorted(nx.degree(G_Email), key=lambda x: x[1], reverse=True))
+def func(G,name):
+    sorted_degree_dict = dict(sorted(nx.degree(G), key=lambda x: x[1], reverse=True))
     # list1 = list(sorted(set(sorted_degree_dict.values()), reverse=True))
     y = list(sorted(set(sorted_degree_dict.values()), reverse=True))
+    #y = list(sorted(sorted_degree_dict.values(), reverse=True))
     x = [i for i in range(1, len(y) + 1)]
     f1 = np.polyfit(x, y, 7)
     print('f1 is:', f1)
     p1 = np.poly1d(f1)
     print('p1 is :\n', p1)
     yvals = p1(x)  # 拟合y值
-    print('yvals is :\n', yvals)
+    p2 = np.polyder(p1, 1)
+    print('p2 is:\n', p2)
+    p3 = np.polyder(p1,2)
+    yvals1 = p2(x)
+    yvals2 = p3(x)
+
+    #print('yvals is :\n', yvals)
     # 绘图
     plot1 = plt.plot(x, y, 's', label='original values')
     plot2 = plt.plot(x, yvals, 'r', label='polyfit values')
+    plot3 = plt.plot(x, yvals1,'g',label = 'polyder values')
+    plot3 = plt.plot(x, yvals2,'y',label = 'polyder2 values')
     plt.xlabel('x')
     plt.ylabel('y')
     plt.legend(loc=4)  # 指定legend的位置右下角
-    plt.title('polyfitting')
+    plt.title('polyfitting of ' + name)
     plt.show()
-    solution = root(fun=p1, x0=1)
+    solution = root(fun=p3,x0=1)
+    solution2 = root(fun = p2,x0 = 1)
     print(solution)
+    print(solution.x[0])
+    print(solution2.x[0])
+    #print(p1(solution.x[0]))
     print(p1(solution.x[0]))
+    print(p1(solution2.x[0]))
+    return p1(solution2.x[0])
+
+def draw_pict_dependon_degree(G,name):
+    G = nx.to_undirected(G)
+    sorted_degree_dict = dict(sorted(nx.degree(G), key=lambda x: x[1], reverse=True))
+    list1 = list(sorted(sorted_degree_dict.values(), reverse=True))
+    list2 = list(sorted_degree_dict.keys())
+    #print(list2)
+    degree1 = func(G,name)
+    cont = 0
+    for i in list1:
+        if i > degree1:
+            cont += 1
+        else:
+            break
+    plt.figure(figsize=(20,10))
+    bigger_list = list2[:int(degree1)+1]
+    smaller_list = list2[int(degree1)+1:]
+    pos = nx.spring_layout(G,k=1.0)
+    #nx.draw_networkx_nodes(subgraph, pos=nx.circular_layout(subgraph), node_color='g', node_size=80)
+    #nx.draw_networkx_edges(subgraph, pos=nx.circular_layout(subgraph), arrows=False)
+    #plot1 = nx.draw_networkx(G,pos=nx.spring_layout(G),nodelist = bigger_list,edgelist = None,node_color = 'g',with_labels=True)
+    #plot2 = nx.draw_networkx(G,pos=nx.spring_layout(G),nodelist = smaller_list,edgelist = None,node_color = 'b',with_labels=True)
+    plot3 = nx.draw_networkx_nodes(G,pos,nodelist=bigger_list,node_size=120,node_color='g')
+    plot4 = nx.draw_networkx_nodes(G,pos,nodelist=smaller_list,node_size=100,node_color='y')
+    plot5 = nx.draw_networkx_edges(G,pos,alpha=0.4,width=0.5)
+    plot6 = nx.draw_networkx_labels(G,pos,font_size=7)
+    plt.title(name)
+    plt.show()
+    Gs = nx.random_geometric_graph
+
+
+
 
 if __name__ == '__main__':
     G_1 = nx.read_gml('1.gml')
@@ -961,7 +1008,8 @@ if __name__ == '__main__':
     G_HepTh = nx.read_edgelist('CA-HepTh.txt')
     #G_lj = nx.read_edgelist('com-lj.ungraph.txt')
     G_Email = nx.read_edgelist('Email-Enron.txt')
-
+    draw_pict_dependon_degree(G_1,'G_1')
+    #func(G_Email,'1')
     #list2 = set(list1[:])
     #hist_pict(G_1,'G_1')
     #hist_pict(G_dol,'G_dol')
