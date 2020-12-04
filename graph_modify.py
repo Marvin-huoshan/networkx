@@ -25,13 +25,11 @@ def multi_process(G,file,name):
     mySheet2 = workbook.sheet_by_name('Sheet2')
     mySheet3 = workbook.sheet_by_name('Sheet3')
     mySheet4 = workbook.sheet_by_name('Sheet4')
-    p = Pool(4)
-    p.apply_async(read_class(G, mySheet1,name+'-sheet1'))
-    p.apply_async(read_class(G, mySheet2,name+'-sheet2'))
-    p.apply_async(read_class(G, mySheet3,name+'-sheet3'))
-    p.apply_async(read_class(G, mySheet4,name+'-sheet4'))
-    p.close()
-    p.join()
+    read_class(G, mySheet1,name+'-sheet1')
+    read_class(G, mySheet2,name+'-sheet2')
+    read_class(G, mySheet3,name+'-sheet3')
+    read_class(G, mySheet4,name+'-sheet4')
+
 
 def read_class(G,mySheet,name):
     '''从划分好的类中取节点，将同一类中小度节点图转化为大度图'''
@@ -40,7 +38,7 @@ def read_class(G,mySheet,name):
     unfrozen_graph = nx.Graph(frozen_graph)
 
     nrows = mySheet.nrows
-    p = Pool(10)
+    p = Pool(40)
     for i in tqdm(range(1,nrows),desc='逐行进行图修改'):
         p.apply_async(process_by_row(frozen_graph,mySheet,i))
     nx.write_gml(unfrozen_graph, name + '.gml')
