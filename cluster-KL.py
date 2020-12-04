@@ -925,42 +925,73 @@ def read_sheet(mysheet,worksheet,k):
                 col += 1
             row += 1
 
-def func(G,name):
+
+def func(G,name,file):
+    workbook = xlrd.open_workbook(file)
+    mySheet = workbook.sheet_by_name('Sheet1')
+    cont_list = mySheet.col_values(1)
+    cont_list.pop(0)
+    set_cont_list = list(set(cont_list))
+    sorted_set_cont_list = list(sorted(set(cont_list)))
+    mid = sorted_set_cont_list[len(sorted_set_cont_list)//2]
+    #print(cont_list)
     sorted_degree_dict = dict(sorted(nx.degree(G), key=lambda x: x[1], reverse=True))
     # list1 = list(sorted(set(sorted_degree_dict.values()), reverse=True))
-    y = list(sorted(set(sorted_degree_dict.values()), reverse=True))
+    #y = list(sorted(set(sorted_degree_dict.values()), reverse=True))
+    x = list(sorted(set(sorted_degree_dict.values())))
+    y = cont_list[:]
+    y.reverse()
+    index = y.index(mid)
+    x = x[index+1:]
+    y = y[index+1:]
+    #y =
     #y = list(sorted(sorted_degree_dict.values(), reverse=True))
-    x = [i for i in range(1, len(y) + 1)]
-    f1 = np.polyfit(x, y, 7)
-    print('f1 is:', f1)
+    #x = [i for i in range(1, len(y) + 1)]
+    f1 = np.polyfit(x, y, 5)
+    #print('f1 is:', f1)
     p1 = np.poly1d(f1)
-    print('p1 is :\n', p1)
+    #print('p1 is :\n', p1)
     yvals = p1(x)  # 拟合y值
-    p2 = np.polyder(p1, 1)
-    print('p2 is:\n', p2)
+    p2 = np.polyder(p1, 1)#一阶导数
+    #print('p2 is:\n', p2)
     p3 = np.polyder(p1,2)
     yvals1 = p2(x)
     yvals2 = p3(x)
 
     #print('yvals is :\n', yvals)
     # 绘图
+    plt.figure(figsize=(20,10))
     plot1 = plt.plot(x, y, 's', label='original values')
     plot2 = plt.plot(x, yvals, 'r', label='polyfit values')
-    plot3 = plt.plot(x, yvals1,'g',label = 'polyder values')
-    plot3 = plt.plot(x, yvals2,'y',label = 'polyder2 values')
+    #plot3 = plt.plot(x, yvals1,'g',label = 'polyder values')
+    #plot3 = plt.plot(x, yvals2,'y',label = 'polyder2 values')
+    my_x_ticks = np.arange(0, 140, 5)
+    plt.xticks(my_x_ticks)
     plt.xlabel('x')
     plt.ylabel('y')
     plt.legend(loc=4)  # 指定legend的位置右下角
     plt.title('polyfitting of ' + name)
+    solution2 = root(fun=p3, x0=[1,2,3])
+    solution = root(fun=p2, x0=[1,30,50,75,85])
+    #list_2 = list[i for i in list(p3(solution.x))]
+    list_2 = []
+
+    for i in range(len(solution.x)):
+        if p3(solution.x[i]) > 0:
+            list_2.append([solution.x[i],p3(solution.x[i])])
+    sorted_list = sorted(list_2,key=lambda x:x[1],reverse=True)
+    print(sorted_list)
+    path = '/Users/mac/Desktop/networkx/'
+    plt.savefig(path + '/' + name + '.png')
     plt.show()
-    solution = root(fun=p3,x0=1)
-    solution2 = root(fun = p2,x0 = 1)
-    print(solution)
-    print(solution.x[0])
-    print(solution2.x[0])
+    #print(solution.x[0])
+    #print(solution2.x[0])
     #print(p1(solution.x[0]))
-    print(p1(solution.x[0]))
-    print(p1(solution2.x[0]))
+    #print(p1(solution.x[0]))
+    #print(solution.x)
+    #print(p1(solution.x[0]))
+    #print(solution2.x[0])
+    #print(p1(solution2.x[0]))
     return p1(solution2.x[0])
 
 def draw_pict_dependon_degree(G,name):
@@ -977,8 +1008,10 @@ def draw_pict_dependon_degree(G,name):
         else:
             break
     plt.figure(figsize=(20,10))
-    bigger_list = list2[:int(degree1)+1]
-    smaller_list = list2[int(degree1)+1:]
+    bigger_list = list2[:int(cont)+1]
+    print('bigger_list:',bigger_list)
+    print('len:',len(bigger_list))
+    smaller_list = list2[int(cont)+1:]
     pos = nx.spring_layout(G,k=1.0)
     #nx.draw_networkx_nodes(subgraph, pos=nx.circular_layout(subgraph), node_color='g', node_size=80)
     #nx.draw_networkx_edges(subgraph, pos=nx.circular_layout(subgraph), arrows=False)
@@ -992,7 +1025,21 @@ def draw_pict_dependon_degree(G,name):
     plt.show()
     Gs = nx.random_geometric_graph
 
-
+def get_bigger_percent(G,name):
+    sorted_degree_dict = dict(sorted(nx.degree(G), key=lambda x: x[1], reverse=True))
+    list1 = list(sorted(sorted_degree_dict.values(), reverse=True))
+    list2 = list(sorted_degree_dict.keys())
+    # print(list2)
+    degree1 = func(G,name)
+    cont = 0
+    for i in list1:
+        if i > degree1:
+            cont += 1
+        else:
+            break
+    print('cont:',cont)
+    print('number of nodes:',nx.number_of_nodes(G))
+    return format(cont/nx.number_of_nodes(G),'.8f')
 
 
 if __name__ == '__main__':
@@ -1008,7 +1055,20 @@ if __name__ == '__main__':
     G_HepTh = nx.read_edgelist('CA-HepTh.txt')
     #G_lj = nx.read_edgelist('com-lj.ungraph.txt')
     G_Email = nx.read_edgelist('Email-Enron.txt')
-    draw_pict_dependon_degree(G_1,'G_1')
+    #draw_pict_dependon_degree(G_net,'G_1')
+    G_list = [G_1,G_dol,G_foot,G_kar,G_les,G_net,G_pol,G_HepPh,G_HepTh,G_Email]
+    G_name_list = ['G_1', 'G_dol', 'G_foot', 'G_kar', 'G_les', 'G_net', 'G_pol', 'G_HepPh', 'G_HepTh', 'G_Email']
+    '''listp = []
+    for i in range(10):
+        listp.append(get_bigger_percent(G_list[i],G_name_list[i]))
+    print(listp)
+    plt.show()
+    plt.hist(listp)
+    plt.xlabel('degree')
+    plt.ylabel('count')
+    plt.title('Degree Distribution of ' )
+    plt.show()'''
+    func(G_Email,'Email','Email-degree_cont.xlsx')
     #func(G_Email,'1')
     #list2 = set(list1[:])
     #hist_pict(G_1,'G_1')
