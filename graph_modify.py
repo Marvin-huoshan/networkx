@@ -25,31 +25,47 @@ def multi_process(G,file,name):
     mySheet2 = workbook.sheet_by_name('Sheet2')
     mySheet3 = workbook.sheet_by_name('Sheet3')
     mySheet4 = workbook.sheet_by_name('Sheet4')
-    read_class(G, mySheet1,name+'-sheet1')
-    read_class(G, mySheet2,name+'-sheet2')
-    read_class(G, mySheet3,name+'-sheet3')
-    read_class(G, mySheet4,name+'-sheet4')
+    list1 = []
+    list2 = []
+    list3 = []
+    list4 = []
+    lists = []
+    for i in range(1,mySheet1.nrows):
+        tmp_list1 = [i for i in list(mySheet1.row_values(i)) if i != '']
+        list1.append(tmp_list1)
+        tmp_list2 = [i for i in list(mySheet2.row_values(i)) if i != '']
+        list2.append(tmp_list2)
+        tmp_list3 = [i for i in list(mySheet3.row_values(i)) if i != '']
+        list3.append(tmp_list3)
+        tmp_list4 = [i for i in list(mySheet4.row_values(i)) if i != '']
+        list4.append(tmp_list4)
+    lists.append(list1)
+    lists.append(list2)
+    lists.append(list3)
+    lists.append(list4)
+    read_class(G, lists[0],name+'-sheet1')
+    read_class(G, lists[1],name+'-sheet2')
+    read_class(G, lists[2],name+'-sheet3')
+    read_class(G, lists[3],name+'-sheet4')
 
-
-def read_class(G,mySheet,name):
+def read_class(G,list1,name):
     '''从划分好的类中取节点，将同一类中小度节点图转化为大度图'''
     #path = '/Users/mac/Desktop/g_modify/'
     frozen_graph = nx.freeze(G)
     unfrozen_graph = nx.Graph(frozen_graph)
-
-    nrows = mySheet.nrows
-    p = Pool(40)
-    for i in tqdm(range(1,nrows),desc='逐行进行图修改'):
-        p.apply_async(process_by_row(frozen_graph,mySheet,i))
-    nx.write_gml(unfrozen_graph, name + '.gml')
+    #nrows = mySheet.nrows
+    p = Pool(processes=4)
+    for i in tqdm(range(len(list1)),desc='逐行进行图修改'):
+        p.apply_async(process_by_row,args=(unfrozen_graph,list1[i]))
+        #process_by_row(unfrozen_graph,mySheet,i)
     p.close()
     p.join()
+    #nx.write_gml(unfrozen_graph, name + '.gml')
 
-
-def process_by_row(G,mySheet,i):
+def process_by_row(G,list1):
     '''处理同一类的一行数据'''
     #🤓
-    list1 = [i for i in list(mySheet.row_values(i)) if i != '']
+    #list1 = [i for i in list(mySheet.row_values(i)) if i != '']
     max = find_max_graph(G, list1)  # 找出每一个类最大的那个子图
     list1.remove(max)
     for i in tqdm(list1, desc='当前行进度'):
@@ -71,7 +87,7 @@ def find_OEP_with(G,node1,node2):
     number1 = nx.number_of_edges(subgraph1)
     number2 = nx.number_of_edges(subgraph2)
     if (abs(number2-number1)/max(number1,number2)) > 0.1:
-        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=3600))
+        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=6))
     else:
         return -1
 
@@ -129,7 +145,8 @@ def Gnode_map(num,node_map):
     return num+'-add'
 
 
-
+def test(i,j):
+    print(i+j)
 
 def node_edit(G,list1):
     '''根据传入的列表，构造整个图中节点的修改数组'''
@@ -141,6 +158,11 @@ if __name__ == '__main__':
     G_1 = nx.to_undirected(G_1)
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
     multi_process(G_1,'com-part-com-3anoymous-1-3-rdivision.xlsx','1')
+    #p.apply_async(multi_process,args=(('com-part-com-3anoymous-1-3-rdivision.xlsx','1-3-3')))
+    #p.apply_async(multi_process,args=(('com-part-com-4anoymous-1-3-rdivision.xlsx','1-4-3')))
+    #p.apply_async(multi_process,args=(('com-part-com-3anoymous-kar-3-rdivision.xlsx','kar-3-3')))
+    #p.close()
+    #p.join()
     '''G_1_1 = nx.read_gml('1-1.gml')
     list1 = list(nx.all_neighbors(G_1_1, '210'))
     list1.append('210')
