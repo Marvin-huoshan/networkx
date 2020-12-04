@@ -46,38 +46,6 @@ def read_class(G,mySheet,name):
     nx.write_gml(unfrozen_graph, name + '.gml')
     p.close()
     p.join()
-    '''list1 = [i for i in list(mySheet.row_values(i)) if i != '']
-        max = find_max_graph(G,list1)   #找出每一个类最大的那个子图
-        list_max = list(nx.all_neighbors(G,max))
-        list_max.append(max)
-        subgraph_max = nx.subgraph(G,list_max)
-        print('max i:' + max)
-        print('max edges:',nx.number_of_edges(subgraph_max))
-        nx.draw_networkx(subgraph_max)
-        plt.title('max:' + max)
-        plt.savefig(path + 'max-' + str(max) + '.png')
-        plt.close()
-        list1.remove(max)
-        for i in tqdm(list1,desc='当前行进度'):
-            list1 = find_OEP_with(unfrozen_graph,i,max)
-            list_before = list(nx.all_neighbors(G,i))
-            list_before.append(i)
-            subgraph_before = nx.subgraph(G,list_before)
-            nx.draw_networkx(subgraph_before)
-            print('before i:' + i)
-            print('before edges:',nx.number_of_edges(subgraph_before))
-            #plt.savefig(path + 'before-' + str(i) + '.png')
-            plt.close()
-            g_modify(unfrozen_graph,list1)
-            list_after = list(nx.all_neighbors(unfrozen_graph, i))
-            list_after.append(i)
-            subgraph_after = nx.subgraph(unfrozen_graph, list_after)
-            nx.draw_networkx(subgraph_after)
-            print('after edges:',nx.number_of_edges(subgraph_after))
-            #plt.savefig(path + 'after-' + str(i) + '.png')
-            print(list1[len(list1)-1][0])
-            print(list1[len(list1)-1][1])
-            plt.close()'''
 
 
 def process_by_row(G,mySheet,i):
@@ -221,3 +189,37 @@ if __name__ == '__main__':
         for j in range(2):
             print(tmp_list[i][j])
     #print(nx.number_of_edges(subgraph2))'''
+
+    #！！！
+    '''list1 = [i for i in list(mySheet.row_values(i)) if i != '']
+            max = find_max_graph(G,list1)   #找出每一个类最大的那个子图
+            list_max = list(nx.all_neighbors(G,max))
+            list_max.append(max)
+            subgraph_max = nx.subgraph(G,list_max)
+            print('max i:' + max)
+            print('max edges:',nx.number_of_edges(subgraph_max))
+            nx.draw_networkx(subgraph_max)
+            plt.title('max:' + max)
+            plt.savefig(path + 'max-' + str(max) + '.png')
+            plt.close()
+            list1.remove(max)
+            for i in tqdm(list1,desc='当前行进度'):
+                list1 = find_OEP_with(unfrozen_graph,i,max)
+                list_before = list(nx.all_neighbors(G,i))
+                list_before.append(i)
+                subgraph_before = nx.subgraph(G,list_before)
+                nx.draw_networkx(subgraph_before)
+                print('before i:' + i)
+                print('before edges:',nx.number_of_edges(subgraph_before))
+                #plt.savefig(path + 'before-' + str(i) + '.png')
+                plt.close()
+                g_modify(unfrozen_graph,list1)
+                list_after = list(nx.all_neighbors(unfrozen_graph, i))
+                list_after.append(i)
+                subgraph_after = nx.subgraph(unfrozen_graph, list_after)
+                nx.draw_networkx(subgraph_after)
+                print('after edges:',nx.number_of_edges(subgraph_after))
+                #plt.savefig(path + 'after-' + str(i) + '.png')
+                print(list1[len(list1)-1][0])
+                print(list1[len(list1)-1][1])
+                plt.close()'''
