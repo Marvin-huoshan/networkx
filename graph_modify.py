@@ -20,16 +20,16 @@ def find_max_graph(G,list1):
 
 def multi_process(G,file,name):
     '''使用多进程'''
-    p = Pool(4)
     workbook = xlrd.open_workbook(file)
     mySheet1 = workbook.sheet_by_name('Sheet1')
     mySheet2 = workbook.sheet_by_name('Sheet2')
     mySheet3 = workbook.sheet_by_name('Sheet3')
     mySheet4 = workbook.sheet_by_name('Sheet4')
-    p.apply_async(read_class, args=(G, mySheet1,name+'-sheet1'))
-    p.apply_async(read_class, args=(G, mySheet2,name+'-sheet2'))
-    p.apply_async(read_class, args=(G, mySheet3,name+'-sheet3'))
-    p.apply_async(read_class, args=(G, mySheet4,name+'-sheet4'))
+    p = Pool(4)
+    p.apply_async(read_class(G, mySheet1,name+'-sheet1'))
+    p.apply_async(read_class(G, mySheet2,name+'-sheet2'))
+    p.apply_async(read_class(G, mySheet3,name+'-sheet3'))
+    p.apply_async(read_class(G, mySheet4,name+'-sheet4'))
     p.close()
     p.join()
 
@@ -41,8 +41,8 @@ def read_class(G,mySheet,name):
 
     nrows = mySheet.nrows
     p = Pool(10)
-    for i in tqdm(range(64,nrows),desc='逐行进行图修改'):
-        p.apply_async(process_by_row,args=(frozen_graph,mySheet,i))
+    for i in tqdm(range(1,nrows),desc='逐行进行图修改'):
+        p.apply_async(process_by_row(frozen_graph,mySheet,i))
     nx.write_gml(unfrozen_graph, name + '.gml')
     p.close()
     p.join()
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     G_1 = nx.read_gml('1-copy-1.gml')
     G_1 = nx.to_undirected(G_1)
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
-    read_class(G_1,'com-part-com-3anoymous-1-3-rdivision.xlsx','1')
+    multi_process(G_1,'com-part-com-3anoymous-1-3-rdivision.xlsx','1')
     '''G_1_1 = nx.read_gml('1-1.gml')
     list1 = list(nx.all_neighbors(G_1_1, '210'))
     list1.append('210')
