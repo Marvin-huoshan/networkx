@@ -54,21 +54,21 @@ def read_class(G,list1,name):
     frozen_graph = nx.freeze(G)
     unfrozen_graph = nx.Graph(frozen_graph)
     #nrows = mySheet.nrows
-    p = Pool(processes=4)
+    p = Pool(processes=38)
     for i in tqdm(range(len(list1)),desc='逐行进行图修改'):
-        p.apply_async(process_by_row,args=(unfrozen_graph,list1[i]))
+        p.apply_async(process_by_row,args=(unfrozen_graph,list1[i],i))
         #process_by_row(unfrozen_graph,mySheet,i)
     p.close()
     p.join()
-    #nx.write_gml(unfrozen_graph, name + '.gml')
+    nx.write_gml(unfrozen_graph, name + '.gml')
 
-def process_by_row(G,list1):
+def process_by_row(G,list1,row):
     '''处理同一类的一行数据'''
     #🤓
     #list1 = [i for i in list(mySheet.row_values(i)) if i != '']
     max = find_max_graph(G, list1)  # 找出每一个类最大的那个子图
     list1.remove(max)
-    for i in tqdm(list1, desc='当前行进度'):
+    for i in tqdm(list1, desc='当前行进度'+str(row)):
         if find_OEP_with(G,i,max) != -1:
             list_edit = find_OEP_with(G, i, max)
         else:
@@ -87,7 +87,7 @@ def find_OEP_with(G,node1,node2):
     number1 = nx.number_of_edges(subgraph1)
     number2 = nx.number_of_edges(subgraph2)
     if (abs(number2-number1)/max(number1,number2)) > 0.1:
-        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=6))
+        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=3600))
     else:
         return -1
 

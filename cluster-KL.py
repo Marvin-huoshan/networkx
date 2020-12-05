@@ -1068,7 +1068,7 @@ if __name__ == '__main__':
     plt.ylabel('count')
     plt.title('Degree Distribution of ' )
     plt.show()'''
-    func(G_Email,'Email','Email-degree_cont.xlsx')
+    #func(G_Email,'Email','Email-degree_cont.xlsx')
     #func(G_Email,'1')
     #list2 = set(list1[:])
     #hist_pict(G_1,'G_1')
