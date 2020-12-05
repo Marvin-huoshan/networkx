@@ -1,4 +1,5 @@
 import networkx as nx
+from networkx import Graph
 import matplotlib.pyplot as plt
 import xlsxwriter
 import xlrd
@@ -6,6 +7,7 @@ import numpy as np
 import time
 from tqdm import tqdm
 from multiprocessing import Pool,Process
+from multiprocessing.managers import BaseManager
 
 def find_max_graph(G,list1):
     '''寻找分为一类的节点中，一邻居子图节点个数最多的节点id'''
@@ -20,6 +22,7 @@ def find_max_graph(G,list1):
 
 def multi_process(G,file,name):
     '''使用多进程'''
+
     workbook = xlrd.open_workbook(file)
     mySheet1 = workbook.sheet_by_name('Sheet1')
     mySheet2 = workbook.sheet_by_name('Sheet2')
@@ -44,36 +47,44 @@ def multi_process(G,file,name):
     lists.append(list3)
     lists.append(list4)
     read_class(G, lists[0],name+'-sheet1')
-    read_class(G, lists[1],name+'-sheet2')
-    read_class(G, lists[2],name+'-sheet3')
-    read_class(G, lists[3],name+'-sheet4')
+    #read_class(G, lists[1],name+'-sheet2')
+    #read_class(G, lists[2],name+'-sheet3')
+    #read_class(G, lists[3],name+'-sheet4')
 
 def read_class(G,list1,name):
     '''从划分好的类中取节点，将同一类中小度节点图转化为大度图'''
     #path = '/Users/mac/Desktop/g_modify/'
     frozen_graph = nx.freeze(G)
-    unfrozen_graph = nx.Graph(frozen_graph)
+    #unfrozen_graph = nx.Graph(frozen_graph)
+    manager = BaseManager()
+    manager.register('Graph', Graph)
+    manager.start()
+    unfrozen_graph = manager.Graph(G)
+    list1.reverse()
     #nrows = mySheet.nrows
-    p = Pool(processes=38)
-    for i in tqdm(range(len(list1)),desc='逐行进行图修改'):
-        p.apply_async(process_by_row,args=(unfrozen_graph,list1[i],i))
+    p = Pool(processes=4)
+    for i in tqdm(range(14),desc='逐行进行图修改'):
+        p.apply_async(process_by_row,args=(G,unfrozen_graph,list1[i]))
         #process_by_row(unfrozen_graph,mySheet,i)
     p.close()
     p.join()
-    nx.write_gml(unfrozen_graph, name + '.gml')
+    print(nx.nodes(unfrozen_graph))
+    print(nx.edges(unfrozen_graph))
+    nx.write_edgelist(unfrozen_graph,name+'.edglist')
+    #nx.write_gml(unfrozen_graph, name + '.gml')
 
-def process_by_row(G,list1,row):
+def process_by_row(G,unfrozen_graph,list1):
     '''处理同一类的一行数据'''
     #🤓
     #list1 = [i for i in list(mySheet.row_values(i)) if i != '']
     max = find_max_graph(G, list1)  # 找出每一个类最大的那个子图
     list1.remove(max)
-    for i in tqdm(list1, desc='当前行进度'+str(row)):
+    for i in tqdm(list1, desc='当前行进度'):
         if find_OEP_with(G,i,max) != -1:
             list_edit = find_OEP_with(G, i, max)
         else:
             continue
-        g_modify(G, list_edit)
+        g_modify(unfrozen_graph, list_edit)
 
 def find_OEP_with(G,node1,node2):
     '''将node1所代表的一邻居图转化为node2所代表的一邻居图'''
@@ -87,7 +98,7 @@ def find_OEP_with(G,node1,node2):
     number1 = nx.number_of_edges(subgraph1)
     number2 = nx.number_of_edges(subgraph2)
     if (abs(number2-number1)/max(number1,number2)) > 0.1:
-        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=3600))
+        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=15))
     else:
         return -1
 
@@ -145,35 +156,55 @@ def Gnode_map(num,node_map):
     return num+'-add'
 
 
-def test(i,j):
-    print(i+j)
+def test(G,node):
+    G.add_node(node)
+    print(nx.nodes(G))
 
 def node_edit(G,list1):
     '''根据传入的列表，构造整个图中节点的修改数组'''
     length = len(list1) - 1
 
 if __name__ == '__main__':
-    t0 = time.perf_counter()
     G_1 = nx.read_gml('1-copy-1.gml')
     G_1 = nx.to_undirected(G_1)
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
-    multi_process(G_1,'com-part-com-3anoymous-1-3-rdivision.xlsx','1')
+    #multi_process(G_1,'com-part-com-3anoymous-1-3-rdivision.xlsx','1')
+    G_1_1 = nx.read_edgelist('1-sheet1.edglist')
+
+    '''frozen_graph = nx.freeze(G_1)
+    unfrozen_graph = nx.Graph(frozen_graph)
+    manager = BaseManager()
+    manager.register('Graph',nx.Graph)
+    manager.start()
+    unfrozen_graph = manager.Graph(frozen_graph)
+    p = Pool(3)
+    for i in range(3):
+        it = p.apply_async(test,args=(unfrozen_graph,str(i)+'s',)).get()
+        print(it)
+    p.close()
+    p.join()
+    print(nx.nodes(unfrozen_graph))'''
+
     #p.apply_async(multi_process,args=(('com-part-com-3anoymous-1-3-rdivision.xlsx','1-3-3')))
     #p.apply_async(multi_process,args=(('com-part-com-4anoymous-1-3-rdivision.xlsx','1-4-3')))
     #p.apply_async(multi_process,args=(('com-part-com-3anoymous-kar-3-rdivision.xlsx','kar-3-3')))
     #p.close()
     #p.join()
-    '''G_1_1 = nx.read_gml('1-1.gml')
+    #frozen_graph = nx.freeze(G)
+    #G_1_1 = nx.read_gml('1-sheet1.gml')
+    #print(nx.nodes(G_1_1))
     list1 = list(nx.all_neighbors(G_1_1, '210'))
     list1.append('210')
     subgraph1 = nx.subgraph(G_1_1, list1)
     nx.draw_networkx(subgraph1)
+    print(nx.number_of_edges(subgraph1))
     plt.show()
-    list2 = list(nx.all_neighbors(G_1, '65'))
+    list2 = list(nx.all_neighbors(G_1_1, '65'))
     list2.append('65')
     subgraph2 = nx.subgraph(G_1_1,list2)
     nx.draw_networkx(subgraph2)
-    plt.show()'''
+    print(nx.number_of_edges(subgraph2))
+    plt.show()
     '''list1 = list(nx.all_neighbors(G_1,'130'))
     list1.append('130')
     #print(list1)
