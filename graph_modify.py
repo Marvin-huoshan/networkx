@@ -47,9 +47,9 @@ def multi_process(G,file,name):
     lists.append(list3)
     lists.append(list4)
     read_class(G, lists[0],name+'-sheet1')
-    #read_class(G, lists[1],name+'-sheet2')
-    #read_class(G, lists[2],name+'-sheet3')
-    #read_class(G, lists[3],name+'-sheet4')
+    read_class(G, lists[1],name+'-sheet2')
+    read_class(G, lists[2],name+'-sheet3')
+    read_class(G, lists[3],name+'-sheet4')
 
 def read_class(G,list1,name):
     '''从划分好的类中取节点，将同一类中小度节点图转化为大度图'''
@@ -62,9 +62,9 @@ def read_class(G,list1,name):
     unfrozen_graph = manager.Graph(G)
     list1.reverse()
     #nrows = mySheet.nrows
-    p = Pool(processes=4)
-    for i in tqdm(range(14),desc='逐行进行图修改'):
-        p.apply_async(process_by_row,args=(G,unfrozen_graph,list1[i]))
+    p = Pool(processes=40)
+    for i in tqdm(range(len(list1)),desc='逐行进行图修改'):
+        p.apply_async(process_by_row,args=(G,unfrozen_graph,list1[i],i))
         #process_by_row(unfrozen_graph,mySheet,i)
     p.close()
     p.join()
@@ -73,13 +73,13 @@ def read_class(G,list1,name):
     nx.write_edgelist(unfrozen_graph,name+'.edglist')
     #nx.write_gml(unfrozen_graph, name + '.gml')
 
-def process_by_row(G,unfrozen_graph,list1):
+def process_by_row(G,unfrozen_graph,list1,row):
     '''处理同一类的一行数据'''
     #🤓
     #list1 = [i for i in list(mySheet.row_values(i)) if i != '']
     max = find_max_graph(G, list1)  # 找出每一个类最大的那个子图
     list1.remove(max)
-    for i in tqdm(list1, desc='当前行进度'):
+    for i in tqdm(list1, desc=str(row) + '行进度'):
         if find_OEP_with(G,i,max) != -1:
             list_edit = find_OEP_with(G, i, max)
         else:
@@ -98,7 +98,7 @@ def find_OEP_with(G,node1,node2):
     number1 = nx.number_of_edges(subgraph1)
     number2 = nx.number_of_edges(subgraph2)
     if (abs(number2-number1)/max(number1,number2)) > 0.1:
-        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=15))
+        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=36000))
     else:
         return -1
 
@@ -168,8 +168,8 @@ if __name__ == '__main__':
     G_1 = nx.read_gml('1-copy-1.gml')
     G_1 = nx.to_undirected(G_1)
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
-    #multi_process(G_1,'com-part-com-3anoymous-1-3-rdivision.xlsx','1')
-    G_1_1 = nx.read_edgelist('1-sheet1.edglist')
+    multi_process(G_1,'com-part-com-3anoymous-1-3-rdivision.xlsx','1')
+    #G_1_1 = nx.read_edgelist('1-sheet1.edglist')
 
     '''frozen_graph = nx.freeze(G_1)
     unfrozen_graph = nx.Graph(frozen_graph)
@@ -193,7 +193,7 @@ if __name__ == '__main__':
     #frozen_graph = nx.freeze(G)
     #G_1_1 = nx.read_gml('1-sheet1.gml')
     #print(nx.nodes(G_1_1))
-    list1 = list(nx.all_neighbors(G_1_1, '210'))
+    '''list1 = list(nx.all_neighbors(G_1_1, '210'))
     list1.append('210')
     subgraph1 = nx.subgraph(G_1_1, list1)
     nx.draw_networkx(subgraph1)
@@ -204,7 +204,7 @@ if __name__ == '__main__':
     subgraph2 = nx.subgraph(G_1_1,list2)
     nx.draw_networkx(subgraph2)
     print(nx.number_of_edges(subgraph2))
-    plt.show()
+    plt.show()'''
     '''list1 = list(nx.all_neighbors(G_1,'130'))
     list1.append('130')
     #print(list1)
