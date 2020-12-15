@@ -93,8 +93,10 @@ def find_OEP_with(G,node1,node2):
     subgraph2 = nx.subgraph(G,list2)
     number1 = nx.number_of_edges(subgraph1)
     number2 = nx.number_of_edges(subgraph2)
-    if (abs(number2-number1)/max(number1,number2)) > 0.1:
-        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=36000))
+    if abs(number1-number2) == 1:
+        return -1
+    elif (abs(number2-number1)/max(number1,number2)) > 0.1:
+        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=1800))
     else:
         return -1
 
@@ -170,7 +172,7 @@ if __name__ == '__main__':
     G_1 = nx.to_undirected(G_1)
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
     #multi_process(G_1,'com-part-com-3anoymous-1-3-rdivision.xlsx','1')
-    multi_process(G_kar,'com-part-com-3anoymous-kar-3-rdivision.xlsx','karrrrrrr')
+    multi_process(G_kar,'com-part-com-3anoymous-kar-3-rdivision.xlsx','kar-18')
     #G_1_1 = nx.read_edgelist('1-sheet1.edglist')
 
     '''frozen_graph = nx.freeze(G_1)
