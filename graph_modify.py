@@ -70,6 +70,7 @@ def process_by_row(original_graph,unfrozen_graph,list1,row):
     '''处理同一类的一行数据'''
     #🤓
     max = find_max_graph(unfrozen_graph, list1)  # 找出每一个类最大的那个子图
+    list1.remove(max)
     #list_max = list(nx.all_neighbors(unfrozen_graph,max))
     #list_max.append(max)
     #subgraph_max = nx.subgraph(unfrozen_graph,list_max)
