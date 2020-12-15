@@ -53,40 +53,32 @@ def multi_process(G,file,name):
 
 def read_class(G,list1,name):
     '''从划分好的类中取节点，将同一类中小度节点图转化为大度图'''
-    #path = '/Users/mac/Desktop/g_modify/'
     frozen_graph = nx.freeze(G)
-    #unfrozen_graph = nx.Graph(frozen_graph)
     manager = BaseManager()
     manager.register('Graph', Graph)
     manager.start()
     unfrozen_graph = manager.Graph(G)
     list1.reverse()
-    #nrows = mySheet.nrows
     p = Pool(processes=42)
     for i in tqdm(range(len(list1)),desc='逐行进行图修改'):
         p.apply_async(process_by_row,args=(G,unfrozen_graph,list1[i],i,))
-        #process_by_row(unfrozen_graph,mySheet,i)
     p.close()
     p.join()
-    #print(nx.nodes(unfrozen_graph))
-    #print(nx.edges(unfrozen_graph))
     nx.write_edgelist(unfrozen_graph,name+'.edglist')
-    #nx.write_gml(unfrozen_graph, name + '.gml')
 
-def process_by_row(G_1,unfrozen_graph,list1,row):
+def process_by_row(original_graph,unfrozen_graph,list1,row):
     '''处理同一类的一行数据'''
     #🤓
-    #list1 = [i for i in list(mySheet.row_values(i)) if i != '']
     max = find_max_graph(unfrozen_graph, list1)  # 找出每一个类最大的那个子图
-    list_max = list(nx.all_neighbors(unfrozen_graph,max))
-    list_max.append(max)
-    subgraph_max = nx.subgraph(unfrozen_graph,list_max)
-    print('max:',nx.number_of_edges(subgraph_max))
+    #list_max = list(nx.all_neighbors(unfrozen_graph,max))
+    #list_max.append(max)
+    #subgraph_max = nx.subgraph(unfrozen_graph,list_max)
+    #print('max:',nx.number_of_edges(subgraph_max))
     for i in tqdm(list1, desc=str(row) + '行进度'):
-        if find_OEP_with(unfrozen_graph,i,max) != -1:
-            list_edit = find_OEP_with(unfrozen_graph, i, max)
+        if find_OEP_with(original_graph,i,max) != -1:
+            list_edit = find_OEP_with(original_graph, i, max)
             max_node_map = np.array(list_edit[len(list_edit)-1][0])
-            max_origin = map_list(max,max_node_map)
+            #max_origin = map_list(max,max_node_map)
         else:
             continue
         g_modify(unfrozen_graph, list_edit,row)
@@ -111,8 +103,10 @@ def find_OEP_with(G,node1,node2):
     subgraph2 = nx.subgraph(G,list2)
     number1 = nx.number_of_edges(subgraph1)
     number2 = nx.number_of_edges(subgraph2)
-    if (abs(number2-number1)/max(number1,number2)) > 0.1:
-        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=10))
+    if abs(number1-number2) == 1:
+        return -1
+    elif (abs(number2-number1)/max(number1,number2)) > 0.1:
+        return list(nx.optimize_edit_paths(subgraph1,subgraph2,timeout=18000))
     else:
         return -1
 
@@ -126,8 +120,10 @@ def g_modify(G,list1,row):
     for i in node_map:
         if i[0] == None:
             '''加点操作'''
-            G.add_node(i[1]+'-add-in'+str(row))
-
+            if isinstance(i[1],str):
+                G.add_node(i[1]+'-add-in'+str(row))
+            else:
+                G.add_node(-i[1])
     for i in edge_map:
         if None in i:
             '''将带None的修改边的对，以及节点的映射关系传入函数，进行边的操作'''
@@ -138,7 +134,6 @@ def edit_edges(G,edge_list,node_map,row):
     '''根据传来的边修改列表，进行边修改操作'''
     remove_list = []
     add_list = []
-    #for i in edge_list:
     tmp = list(edge_list)
     if tmp.index(None) == 0:    #加边操作
         tmp.remove(None)
@@ -147,8 +142,6 @@ def edit_edges(G,edge_list,node_map,row):
     else:   #减边操作
         tmp.remove(None)
         remove_list.append(tmp.pop())
-        print('remove list:')
-        print(remove_list)
         Gremove_list(G,remove_list)
 
 def Gremove_list(G,remove_list):
@@ -163,8 +156,6 @@ def Gadd_list(G,add_list,node_map,row):
         for j in range(2):
             tmp_list.append(str(Gnode_map(add_list[i][j],node_map,row)))
     new_add_list.append(tuple(tmp_list))
-    print('add list:')
-    print(new_add_list)
     G.add_edges_from(new_add_list)
 
 def Gnode_map(num,node_map,row):
@@ -172,7 +163,10 @@ def Gnode_map(num,node_map,row):
     for i in range(len(node_map)):
         if node_map[i][1] == num and node_map[i][0] != None:
             return node_map[i][0]
-    return num+'-add-in'+str(row)
+        elif isinstance(num,str):
+            return num+'-add-in'+str(row)
+        else:
+            return -num
 
 
 def test(G,node):
@@ -208,6 +202,7 @@ def draw_subgraph(node1,node2,G1,G2):
     nx.draw_networkx(subgraph4)
     print('G_1_1:',nx.number_of_edges(subgraph4))
     plt.show()
+
 def test_frozen(name1,name2,name3,G1,G2,G3):
     print(name1+' number of edges:',nx.number_of_edges(G1))
     print(name2+' number of edges:',nx.number_of_edges(G2))

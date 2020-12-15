@@ -1058,6 +1058,8 @@ if __name__ == '__main__':
     #draw_pict_dependon_degree(G_net,'G_1')
     G_list = [G_1,G_dol,G_foot,G_kar,G_les,G_net,G_pol,G_HepPh,G_HepTh,G_Email]
     G_name_list = ['G_1', 'G_dol', 'G_foot', 'G_kar', 'G_les', 'G_net', 'G_pol', 'G_HepPh', 'G_HepTh', 'G_Email']
+    test = ['106','214','213','259']
+    print(division(G_1,test))
     '''listp = []
     for i in range(10):
         listp.append(get_bigger_percent(G_list[i],G_name_list[i]))
