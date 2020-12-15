@@ -47,9 +47,9 @@ def multi_process(G,file,name):
     lists.append(list3)
     lists.append(list4)
     read_class(G, lists[0],name+'-sheet1')
-    read_class(G, lists[1],name+'-sheet2')
-    read_class(G, lists[2],name+'-sheet3')
-    read_class(G, lists[3],name+'-sheet4')
+    #read_class(G, lists[1],name+'-sheet2')
+    #read_class(G, lists[2],name+'-sheet3')
+    #read_class(G, lists[3],name+'-sheet4')
 
 def read_class(G,list1,name):
     '''从划分好的类中取节点，将同一类中小度节点图转化为大度图'''
@@ -62,29 +62,25 @@ def read_class(G,list1,name):
     unfrozen_graph = manager.Graph(G)
     list1.reverse()
     #nrows = mySheet.nrows
-    p = Pool(processes=40)
+    p = Pool(processes=42)
     for i in tqdm(range(len(list1)),desc='逐行进行图修改'):
-        p.apply_async(process_by_row,args=(G,unfrozen_graph,list1[i],i))
-        #process_by_row(unfrozen_graph,mySheet,i)
+        p.apply_async(process_by_row,args=(G,unfrozen_graph,list1[i],i,))
     p.close()
     p.join()
-    print(nx.nodes(unfrozen_graph))
-    print(nx.edges(unfrozen_graph))
     nx.write_edgelist(unfrozen_graph,name+'.edglist')
-    #nx.write_gml(unfrozen_graph, name + '.gml')
 
-def process_by_row(G,unfrozen_graph,list1,row):
+def process_by_row(origin_graph,unfrozen_graph,list1,row):
     '''处理同一类的一行数据'''
     #🤓
     #list1 = [i for i in list(mySheet.row_values(i)) if i != '']
-    max = find_max_graph(G, list1)  # 找出每一个类最大的那个子图
+    max = find_max_graph(unfrozen_graph, list1)  # 找出每一个类最大的那个子图
     list1.remove(max)
     for i in tqdm(list1, desc=str(row) + '行进度'):
-        if find_OEP_with(G,i,max) != -1:
-            list_edit = find_OEP_with(G, i, max)
+        if find_OEP_with(origin_graph,i,max) != -1:
+            list_edit = find_OEP_with(origin_graph, i, max)
         else:
             continue
-        g_modify(unfrozen_graph, list_edit)
+        g_modify(unfrozen_graph, list_edit,row)
 
 def find_OEP_with(G,node1,node2):
     '''将node1所代表的一邻居图转化为node2所代表的一邻居图'''
@@ -102,7 +98,7 @@ def find_OEP_with(G,node1,node2):
     else:
         return -1
 
-def g_modify(G,list1):
+def g_modify(G,list1,row):
     '''按照图修改列表进行图修改'''
     modify_list = list1[:]
     length = len(modify_list) - 1
@@ -112,23 +108,25 @@ def g_modify(G,list1):
     for i in node_map:
         if i[0] == None:
             '''加点操作'''
-            G.add_node(i[1]+'-add')
+            if isinstance(i[1],str):
+                G.add_node(i[1]+'-add-in'+str(row))
+            else:
+                G.add_node(-i[1])
     for i in edge_map:
         if None in i:
             '''将带None的修改边的对，以及节点的映射关系传入函数，进行边的操作'''
-            edit_edges(G,i,node_map)
+            edit_edges(G,i,node_map,row)
 
 
-def edit_edges(G,edge_list,node_map):
+def edit_edges(G,edge_list,node_map,row):
     '''根据传来的边修改列表，进行边修改操作'''
     remove_list = []
     add_list = []
-    #for i in edge_list:
     tmp = list(edge_list)
     if tmp.index(None) == 0:    #加边操作
         tmp.remove(None)
         add_list.append(tmp.pop())
-        Gadd_list(G,add_list,node_map)
+        Gadd_list(G,add_list,node_map,row)
     else:   #减边操作
         tmp.remove(None)
         remove_list.append(tmp.pop())
@@ -138,22 +136,25 @@ def Gremove_list(G,remove_list):
     '''原图中删除原来存在的边'''
     G.remove_edges_from(remove_list)
 
-def Gadd_list(G,add_list,node_map):
+def Gadd_list(G,add_list,node_map,row):
     '''原图中增加新的边'''
     tmp_list = []
     new_add_list = []
     for i in range(len(add_list)):
         for j in range(2):
-            tmp_list.append(str(Gnode_map(add_list[i][j],node_map)))
+            tmp_list.append(str(Gnode_map(add_list[i][j],node_map,row)))
     new_add_list.append(tuple(tmp_list))
     G.add_edges_from(new_add_list)
 
-def Gnode_map(num,node_map):
+def Gnode_map(num,node_map,row):
     '''根据映射列表，将点映射回原图'''
     for i in range(len(node_map)):
         if node_map[i][1] == num and node_map[i][0] != None:
             return node_map[i][0]
-    return num+'-add'
+        elif isinstance(num,str):
+            return num+'-add-in'+str(row)
+        else:
+            return -num
 
 
 def test(G,node):
@@ -168,7 +169,8 @@ if __name__ == '__main__':
     G_1 = nx.read_gml('1-copy-1.gml')
     G_1 = nx.to_undirected(G_1)
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
-    multi_process(G_1,'com-part-com-3anoymous-1-3-rdivision.xlsx','1')
+    #multi_process(G_1,'com-part-com-3anoymous-1-3-rdivision.xlsx','1')
+    multi_process(G_kar,'com-part-com-3anoymous-kar-3-rdivision.xlsx','karrrrrrr')
     #G_1_1 = nx.read_edgelist('1-sheet1.edglist')
 
     '''frozen_graph = nx.freeze(G_1)
