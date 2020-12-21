@@ -1041,6 +1041,18 @@ def get_bigger_percent(G,name):
     print('number of nodes:',nx.number_of_nodes(G))
     return format(cont/nx.number_of_nodes(G),'.8f')
 
+def G_id(G,name):
+    '''图的节点按照id从零开始编号，生成一系列文件'''
+    G_un = G.to_undirected()
+    G_id = nx.convert_node_labels_to_integers(G_un)
+    same_degree(G,name)
+    R_division(G_id, 3, name)
+    comb(G_id,3,name+'-3-rdivision.xlsx',0.5,0.5)
+    comb(G_id,4,name+'-3-rdivision.xlsx',0.5,0.5)
+    part(G_id,'com-3anoymous-' + name + '-3-rdivision.xlsx',3)
+    part(G_id,'com-4anoymous-' + name + '-3-rdivision.xlsx',4)
+    part_comb(G_id,3,'part-com-3anoymous-' + name + '-3-rdivision.xlsx',0.5,0.5)
+    part_comb(G_id,4,'part-com-4anoymous-' + name + '-3-rdivision.xlsx',0.5,0.5)
 
 if __name__ == '__main__':
     G_1 = nx.read_gml('1.gml',label=None)
