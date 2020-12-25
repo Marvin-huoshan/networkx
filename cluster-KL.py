@@ -715,7 +715,7 @@ def part(G,file,k):
 
                         if col >= k:
                             row[n] += 1
-    for i in range(4):
+    '''for i in range(4):
         for j in range(row[i]):
             if i == 0:
                 worksheet1.write(j, 0, '类')
@@ -724,7 +724,7 @@ def part(G,file,k):
             elif i == 2:
                 worksheet3.write(j, 0, '类')
             elif i == 3:
-                worksheet4.write(j, 0, '类')
+                worksheet4.write(j, 0, '类')'''
     workbook.close()
 
 def division(G,list1):
@@ -1058,7 +1058,7 @@ if __name__ == '__main__':
     G_1 = nx.read_gml('1.gml',label=None)
     G_dol = nx.read_gml('dolphins.gml')
     G_foot = nx.read_gml('football.gml')
-    G_hep = nx.read_gml('hep-th.gml')
+    #G_hep = nx.read_gml('hep-th.gml')
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
     G_les = nx.read_gml('lesmis.gml')
     G_net = nx.read_gml('netscience.gml')
