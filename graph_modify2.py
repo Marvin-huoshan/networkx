@@ -43,6 +43,7 @@ def read_file(G,file):
     lists = []
     for i in range(1, mySheet1.nrows):
         tmp_list1 = [i for i in list(mySheet1.row_values(i)) if i != '']
+        print(tmp_list1)
         tmp_list1 = sorted(tmp_list1,key=lambda x:nx.degree(G,x),reverse=True)
         list1.append(tmp_list1)
         tmp_list2 = [i for i in list(mySheet2.row_values(i)) if i != '']
@@ -127,6 +128,10 @@ def addedges(row,num,unfrozen_graph,A,A2,A3):
     flag = 0
     while(num != 0):
         id_list = list(A2[row][:])
+        print('node:',row)
+        print(num)
+        if max(id_list) == 0:
+            break
         id_match = id_list.index(1)
         while (edit_list[id_match] == 0):
             id_list[id_match] = 0
@@ -195,10 +200,20 @@ if __name__ == '__main__':
     G_1 = nx.read_gml('1.gml',label=None)
     G_HepTh = nx.read_edgelist('CA-HepTh.txt')
     G_HepTh = nx.convert_node_labels_to_integers(G_HepTh)
+    list_HepTh = list(max(nx.connected_components(G_HepTh)))
+    G_HepTh_connect = nx.subgraph(G_HepTh, list_HepTh)
     G_HepPh = nx.read_edgelist('CA-HepPh.txt')
     G_HepPh = nx.convert_node_labels_to_integers(G_HepPh)
     G_kar_un = G_kar.to_undirected()
     G_1_un = G_1.to_undirected()
+    p = Pool(processes=4)
+    for i in tqdm(range(2,5),desc='ex'):
+        t = p.apply_async(do_by_graph,args=(G_HepTh_connect,'com-part-com-'+str(5*i)+'anoymous-HepTh-id-connect-3-rdivision.xlsx',i,'HepTh-nect-5-sheet'+str(i))).get()
+        print(t)
+    p.close()
+    p.join()
+    #do_by_graph(G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx',)
+    #do_by_graph(G_HepTh_connect,'com-part-com-10anoymous-HepTh-id-3-rdivision.xlsx',1,'HepTh-10-sheet1')
     #do_by_graph(G_1_un, 'com-part-com-3anoymous-1-id-3-rdivision.xlsx',4,'1-sheet4')
     #do_by_graph(G_kar_un, 'com-part-com-3anoymous-kar-3-rdivision.xlsx', 'kar-sheet4')
     '''G_kar_anoy_1 = nx.read_gml('kar-sheet1.gml')
