@@ -32,8 +32,38 @@ def avg_betweenness_change(G1,G2):
         sum2 += val2
     return (sum1-sum2)/sum1
 
-if __name__ == '__main__':
+def sim(G,file_list):
+    list_G = list(max(nx.connected_components(G)))
+    G_connect = nx.subgraph(G_HepTh, list_G)
+    G_connect = nx.convert_node_labels_to_integers(G_connect)
+    for i in file_list:
+        G_modify = nx.read_gml(i)
+        print('G_connect edges:',nx.number_of_edges(G_connect))
+        print('G_modify edges:',nx.number_of_edges(G_modify))
+        print('边改变量：',nx.number_of_edges(G_modify) - nx.number_of_edges(G_connect))
+        print('G_connect AVE:', 2 * nx.number_of_edges(G_connect) / nx.number_of_nodes(G_connect))
+        print('G_modify AVE:', 2 * nx.number_of_edges(G_modify) / nx.number_of_nodes(G_modify))
+        print('平均度改变量：', 2 * nx.number_of_edges(G_modify) / nx.number_of_nodes(G_modify) - 2 * nx.number_of_edges(G_connect) / nx.number_of_nodes(G_connect))
+        print('G_connect ACC:', avg_cluster(G_connect))
+        print('G_modify ACC:', avg_cluster(G_modify))
+        print('平均聚类系数改变量：', avg_cluster(G_modify) - avg_cluster(G_connect))
+        print('G_connect APL:', avg_shortest_path(G_connect))
+        print('G_modify APL:', avg_shortest_path(G_modify))
+        print('平均最短路径改变量：', avg_shortest_path(G_modify) - avg_shortest_path(G_connect))
+        sum1 = 0;
+        sum2 = 0
+        dict1 = nx.betweenness_centrality(G_connect)
+        dict2 = nx.betweenness_centrality(G_modify)
+        for val1 in dict1.values():
+            sum1 += val1
+        for val2 in dict2.values():
+            sum2 += val2
+        print('G_connect ABC:', sum1 / nx.number_of_nodes(G_connect))
+        print('G_modify ABC:', sum2 / nx.number_of_nodes(G_modify))
+        print('平均中心性改变量：', sum2 / nx.number_of_nodes(G_modify) - sum1 / nx.number_of_nodes(G_connect))
 
+
+if __name__ == '__main__':
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
     G_1 = nx.read_gml('1.gml', label=None)
     G_HepTh = nx.read_edgelist('CA-HepTh.txt')
@@ -50,7 +80,11 @@ if __name__ == '__main__':
     G_kar_anoy_2 = nx.read_gml('kar-sheet2.gml')
     G_kar_anoy_3 = nx.read_gml('kar-sheet3.gml')
     G_kar_anoy_4 = nx.read_gml('kar-sheet4.gml')
-    print(2*nx.number_of_edges(G_kar)/nx.number_of_nodes(G_kar))
+    HepTh_list = ['HepTh-nect-5-sheet2.gml','HepTh-nect-5-sheet3.gml','HepTh-nect-5-sheet4.gml',
+                  'HepTh-nect-10-sheet2.gml','HepTh-nect-10-sheet3.gml','HepTh-nect-10-sheet4.gml',
+                  'HepTh-nect-15-sheet2.gml','HepTh-nect-10-sheet3.gml','HepTh-nect-15-sheet4.gml']
+    sim(G_HepTh,HepTh_list)
+    '''print(2*nx.number_of_edges(G_kar)/nx.number_of_nodes(G_kar))
     print(2*nx.number_of_edges(G_kar_anoy_1)/nx.number_of_nodes(G_kar_anoy_1))
     print(2 * nx.number_of_edges(G_1) / nx.number_of_nodes(G_1))
     print(2 * nx.number_of_edges(G_1_anoy_1) / nx.number_of_nodes(G_1_anoy_1))
@@ -60,4 +94,4 @@ if __name__ == '__main__':
     print(avg_cluster(G_1))
     print(avg_cluster(G_1_anoy_1))
     print(avg_shortest_path(G_1))
-    print(avg_shortest_path(G_1_anoy_1))
+    print(avg_shortest_path(G_1_anoy_1))'''
