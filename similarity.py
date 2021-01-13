@@ -93,13 +93,40 @@ def subgraph_sim_1(G,G_origin,list_class,row,worksheet):
 
 
 def compute_IGF(G,node):
-    sublist = nx.all_neighbors(G,node)
-    subgraph = nx.subgraph(G,sublist)
+    sublist = list(nx.all_neighbors(G,node))
+    sublist.append(node)
+    subgraph = G.subgraph(sublist)
+    print(nx.number_of_edges(subgraph))
     item1 = 0
     for i in nx.nodes(G):
         item1 += (nx.degree(G,i) * math.log(nx.degree(G,i)))
     IGF = math.log(2 * nx.number_of_edges(subgraph)) - (1/(2 * nx.number_of_edges(subgraph))) * item1
     return IGF
+
+def indexs(G,name):
+    '''计算每个节点的IGF，中心性，聚类系数'''
+    #首先将图中节点按照度从大到小排序
+    node_list = list(nx.nodes(G))
+    node_list = sorted(node_list, key=lambda x: nx.degree(G, x), reverse=True)
+    workbook = xlsxwriter.Workbook(name+'.xlsx')
+    worksheet = workbook.add_worksheet()
+    print(nx.betweenness_centrality(G))
+    dict_betweeness = nx.betweenness_centrality(G)
+    worksheet.write(0,0,'节点')
+    worksheet.write(0,1,'IGF')
+    worksheet.write(0,2,'BC')
+    worksheet.write(0,3,'LC')
+    for i in tqdm(range(len(node_list))):
+        IGF = compute_IGF(G,node_list[i])
+        #介数中心性
+        BC = dict_betweeness[i]
+        #聚类系数
+        LC = nx.clustering(G,i)
+        worksheet.write(i,0,node_list[i])
+        worksheet.write(i,1,IGF)
+        worksheet.write(i,2,BC)
+        worksheet.write(i,3,LC)
+    workbook.close()
 
 
 if __name__ == '__main__':
@@ -126,8 +153,8 @@ if __name__ == '__main__':
                   'HepTh-nect-15-sheet2.gml','HepTh-nect-15-sheet3.gml','HepTh-nect-15-sheet4.gml']
     G_HepTh_5anoy2 = nx.read_gml('HepTh-nect-5-sheet2.gml')
     G_HepTh_5anoy2 = nx.convert_node_labels_to_integers(G_HepTh_5anoy2)
-    subgraph_sim(G_HepTh_5anoy2,G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx')
-    print(compute_IGF(G_HepTh_5anoy2,86))
+    indexs(G_HepTh_connect,'HepTh_connect_index')
+    #subgraph_sim(G_HepTh_5anoy2,G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx')
     #sim(G_HepTh,HepTh_list)
     '''print(2*nx.number_of_edges(G_kar)/nx.number_of_nodes(G_kar))
     print(2*nx.number_of_edges(G_kar_anoy_1)/nx.number_of_nodes(G_kar_anoy_1))
