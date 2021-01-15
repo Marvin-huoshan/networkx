@@ -141,8 +141,8 @@ def addedges(row,num,unfrozen_graph,A,A2,A3):
             if(max(id_list) == 0 and flag == 1):
                 break
             id_match = id_list.index(1)
-        if flag == 1:
-            break;
+        if(max(id_list) == 0 and flag == 1):
+            break
         col = int(id_match)
         #unfrozen_graph.add_edge(row + 1,col + 1)   #id->1
         unfrozen_graph.add_edge(row, col)   #id->0
@@ -153,10 +153,18 @@ def addedges(row,num,unfrozen_graph,A,A2,A3):
         edit_list[col] -= 1
         A[row][col] = 1
         A[col][row] = 1
-        A2[row][col] = 0
-        A2[col][row] = 0
-    A2[row] = 0
-    A2[:,row] = 0
+        if flag == 0:
+            A2[row][col] = 0
+            A2[col][row] = 0
+        if flag == 1:
+            A2[row][col] = 0
+            A2[col][row] = 0
+    if flag == 0:
+        A2[row] = 0
+        A2[:,row] = 0
+    if flag == 1:
+        A3[row] = 0
+        A3[:, row] = 0
 
 def adj2excel():
     A, A2, A3, A4 = Adjacency(G_kar)
@@ -202,14 +210,16 @@ if __name__ == '__main__':
     G_HepTh = nx.convert_node_labels_to_integers(G_HepTh)
     list_HepTh = list(max(nx.connected_components(G_HepTh)))
     G_HepTh_connect = nx.subgraph(G_HepTh, list_HepTh)
+    G_HepTh_connect = nx.convert_node_labels_to_integers(G_HepTh_connect)
     G_HepPh = nx.read_edgelist('CA-HepPh.txt')
     G_HepPh = nx.convert_node_labels_to_integers(G_HepPh)
     G_kar_un = G_kar.to_undirected()
     G_1_un = G_1.to_undirected()
-    p = Pool(processes=4)
+    p = Pool(processes=12)
     for i in tqdm(range(2,5),desc='ex'):
-        t = p.apply_async(do_by_graph,args=(G_HepTh_connect,'com-part-com-'+str(5*i)+'anoymous-HepTh-id-connect-3-rdivision.xlsx',i,'HepTh-nect-5-sheet'+str(i))).get()
-        print(t)
+        p.apply_async(do_by_graph,args=(G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx',i,'HepTh-nect-5-sheet'+str(i)))
+        p.apply_async(do_by_graph, args=(G_HepTh_connect, 'com-part-com-10anoymous-HepTh-id-connect-3-rdivision.xlsx', i,'HepTh-nect-10-sheet' + str(i)))
+        p.apply_async(do_by_graph, args=(G_HepTh_connect, 'com-part-com-15anoymous-HepTh-id-connect-3-rdivision.xlsx', i,'HepTh-nect-15-sheet' + str(i)))
     p.close()
     p.join()
     #do_by_graph(G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx',)
