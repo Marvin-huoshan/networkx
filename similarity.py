@@ -33,25 +33,46 @@ def avg_betweenness_change(G1,G2):
         sum2 += val2
     return (sum1-sum2)/sum1
 
-def sim(G,file_list):
+def sim(G,file_list,name):
     list_G = list(max(nx.connected_components(G)))
     G_connect = nx.subgraph(G, list_G)
     G_connect = nx.convert_node_labels_to_integers(G_connect)
-    for i in file_list:
+    workbook = xlsxwriter.Workbook('similarity-'+str(name)+'.xlsx')
+    worksheet = workbook.add_worksheet()
+    row = 0;col = 0
+    for i in tqdm(file_list,desc='ex:'):
         G_modify = nx.read_gml(i)
+        worksheet.write(row,col,name)
+        col += 1
         print('G_connect edges:',nx.number_of_edges(G_connect))
         print('G_modify edges:',nx.number_of_edges(G_modify))
-        print('边改变量：',nx.number_of_edges(G_modify) - nx.number_of_edges(G_connect))
+        ME = nx.number_of_edges(G_modify) - nx.number_of_edges(G_connect)
+        print('边改变量：',ME)
+        worksheet.write(2 * row,col,ME)
+        worksheet.write(2 * row + 1,col,ME / nx.number_of_edges(G_connect))
+        col += 1
         print('G_connect AVE:', 2 * nx.number_of_edges(G_connect) / nx.number_of_nodes(G_connect))
         print('G_modify AVE:', 2 * nx.number_of_edges(G_modify) / nx.number_of_nodes(G_modify))
         print('平均度改变量：', 2 * nx.number_of_edges(G_modify) / nx.number_of_nodes(G_modify) - 2 * nx.number_of_edges(G_connect) / nx.number_of_nodes(G_connect))
+        AVE = 2 * nx.number_of_edges(G_modify) / nx.number_of_nodes(G_modify) - 2 * nx.number_of_edges(G_connect) / nx.number_of_nodes(G_connect)
+        worksheet.write(2 * row,col,AVE)
+        worksheet.write(2 * row + 1,col,AVE / (2 * nx.number_of_edges(G_connect) / nx.number_of_nodes(G_connect)))
+        col += 1
         print('G_connect ACC:', avg_cluster(G_connect))
         print('G_modify ACC:', avg_cluster(G_modify))
         print('平均聚类系数改变量：', avg_cluster(G_modify) - avg_cluster(G_connect))
+        ACC = avg_cluster(G_modify) - avg_cluster(G_connect)
+        worksheet.write(3 * row,col,ACC)
+        worksheet.write(3 * row + 1,col,ACC / avg_cluster(G_connect))
+        col += 1
         print('G_connect APL:', avg_shortest_path(G_connect))
         print('G_modify APL:', avg_shortest_path(G_modify))
         print('平均最短路径改变量：', avg_shortest_path(G_modify) - avg_shortest_path(G_connect))
-        sum1 = 0;
+        APL = avg_shortest_path(G_modify) - avg_shortest_path(G_connect)
+        worksheet.write(4 * row,col,APL)
+        worksheet.write(4 * row + 1,col,APL / avg_shortest_path(G_connect))
+        col += 1
+        sum1 = 0
         sum2 = 0
         dict1 = nx.betweenness_centrality(G_connect)
         dict2 = nx.betweenness_centrality(G_modify)
@@ -62,6 +83,10 @@ def sim(G,file_list):
         print('G_connect ABC:', sum1 / nx.number_of_nodes(G_connect))
         print('G_modify ABC:', sum2 / nx.number_of_nodes(G_modify))
         print('平均中心性改变量：', sum2 / nx.number_of_nodes(G_modify) - sum1 / nx.number_of_nodes(G_connect))
+        ABC = sum2 / nx.number_of_nodes(G_modify) - sum1 / nx.number_of_nodes(G_connect)
+        worksheet.write(5 * row,col,ABC)
+        worksheet.write(5 * row + 1,col,ABC / (sum1 / nx.number_of_nodes(G_connect)))
+    workbook.close()
 
 def subgraph_sim(G,G_origin,file):
     workbook = xlrd.open_workbook(file)
@@ -151,11 +176,12 @@ if __name__ == '__main__':
     HepTh_list = ['HepTh-nect-5-sheet2.gml','HepTh-nect-5-sheet3.gml','HepTh-nect-5-sheet4.gml',
                   'HepTh-nect-10-sheet2.gml','HepTh-nect-10-sheet3.gml','HepTh-nect-10-sheet4.gml',
                   'HepTh-nect-15-sheet2.gml','HepTh-nect-15-sheet3.gml','HepTh-nect-15-sheet4.gml']
+    HepTh_list = ['HepTh-nect-5-sheet2.gml']
     G_HepTh_5anoy2 = nx.read_gml('HepTh-nect-5-sheet2.gml')
     G_HepTh_5anoy2 = nx.convert_node_labels_to_integers(G_HepTh_5anoy2)
-    indexs(G_HepTh_connect,'HepTh_connect_index')
+    #indexs(G_HepTh_connect,'HepTh_connect_index')
     #subgraph_sim(G_HepTh_5anoy2,G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx')
-    #sim(G_HepTh,HepTh_list)
+    sim(G_HepTh,HepTh_list,'G_HepTh')
     '''print(2*nx.number_of_edges(G_kar)/nx.number_of_nodes(G_kar))
     print(2*nx.number_of_edges(G_kar_anoy_1)/nx.number_of_nodes(G_kar_anoy_1))
     print(2 * nx.number_of_edges(G_1) / nx.number_of_nodes(G_1))
