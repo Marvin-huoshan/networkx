@@ -15,17 +15,27 @@ import os
 def Adjacency(G):
     '''根据输入图，生成邻接矩阵、仅二跳可达矩阵、仅三跳可达矩阵,矩阵按照G.nodes()的顺序'''
     A = np.array(nx.adjacency_matrix(G).todense())  # 邻接矩阵
+    print('A*A')
     A2s = np.dot(A, A)  # A2s
     row, col = np.diag_indices_from(A2s)
+    print('duijiao->0')
     A2s[row, col] = 0  # 对角线归零
+    print('fei0->1')
     A2s[np.nonzero(A2s)] = 1  # 非零值为1
+    print('A2s - A')
     A2 = A2s - A
+    print('config A2')
     A2[A2 < 0] = 0  # 仅二跳可达矩阵
+    print('A2s * A')
     A3s = np.dot(A2s, A)
     row, col = np.diag_indices_from(A3s)
+    print('duijiao->0')
     A3s[row, col] = 0  # 对角线归零
+    print('fei0->1')
     A3s[np.nonzero(A3s)] = 1  # 非零值归1
+    print('A3s - A2s')
     A3 = A3s - A2s
+    print('config A3:')
     A3[A3 < 0] = 0  # 仅三跳可达矩阵
     return A,A2,A3
 
@@ -157,14 +167,12 @@ def addedges(row,num,unfrozen_graph,A,A2,A3):
             A2[row][col] = 0
             A2[col][row] = 0
         if flag == 1:
-            A2[row][col] = 0
-            A2[col][row] = 0
-    if flag == 0:
-        A2[row] = 0
-        A2[:,row] = 0
-    if flag == 1:
-        A3[row] = 0
-        A3[:, row] = 0
+            A3[row][col] = 0
+            A3[col][row] = 0
+    A2[row] = 0
+    A2[:,row] = 0
+    A3[row] = 0
+    A3[:, row] = 0
 
 def adj2excel():
     A, A2, A3, A4 = Adjacency(G_kar)
@@ -207,19 +215,20 @@ if __name__ == '__main__':
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
     G_1 = nx.read_gml('1.gml',label=None)
     G_HepTh = nx.read_edgelist('CA-HepTh.txt')
-    G_HepTh = nx.convert_node_labels_to_integers(G_HepTh)
-    list_HepTh = list(max(nx.connected_components(G_HepTh)))
-    G_HepTh_connect = nx.subgraph(G_HepTh, list_HepTh)
-    G_HepTh_connect = nx.convert_node_labels_to_integers(G_HepTh_connect)
+    G_Email = nx.read_edgelist('Email-Enron.txt')
+    G_Email = nx.convert_node_labels_to_integers(G_Email)
+    list_email = list(max(nx.connected_components(G_Email)))
+    G_Email_connect = nx.subgraph(G_Email, list_email)
+    G_Email_connect = nx.convert_node_labels_to_integers(G_Email_connect)
     G_HepPh = nx.read_edgelist('CA-HepPh.txt')
     G_HepPh = nx.convert_node_labels_to_integers(G_HepPh)
     G_kar_un = G_kar.to_undirected()
     G_1_un = G_1.to_undirected()
-    p = Pool(processes=12)
-    for i in tqdm(range(2,5),desc='ex'):
-        p.apply_async(do_by_graph,args=(G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx',i,'HepTh-nect-5-sheet'+str(i)))
-        p.apply_async(do_by_graph, args=(G_HepTh_connect, 'com-part-com-10anoymous-HepTh-id-connect-3-rdivision.xlsx', i,'HepTh-nect-10-sheet' + str(i)))
-        p.apply_async(do_by_graph, args=(G_HepTh_connect, 'com-part-com-15anoymous-HepTh-id-connect-3-rdivision.xlsx', i,'HepTh-nect-15-sheet' + str(i)))
+    p = Pool(processes=18)
+    for i in tqdm(range(2, 5), desc='ex'):
+        p.apply_async(do_by_graph, args=(G_Email_connect, 'com-part-com-5anoymous-Email-id-connect-3-rdivision.xlsx', i, 'Email-nect-5-sheet' + str(i)))
+        #p.apply_async(do_by_graph, args=(G_Email_connect, 'com-part-com-10anoymous-Email-id-connect-3-rdivision.xlsx', i,'Email-nect-10-sheet' + str(i)))
+        #p.apply_async(do_by_graph, args=(G_Email_connect, 'com-part-com-15anoymous-Email-id-connect-3-rdivision.xlsx', i,'Email-nect-15-sheet' + str(i)))
     p.close()
     p.join()
     #do_by_graph(G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx',)
