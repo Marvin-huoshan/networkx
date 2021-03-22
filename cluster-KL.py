@@ -503,7 +503,6 @@ def dist_list(G,list1,list2,w1,w2):
             d = abs((avgcluster1 - avgcluster2)/avgcluster1)
         if avgcluster1 == 0:
             d = abs((avgdegree1 - avgdegree2)/avgdegree1)
-
     else:
         d = 2*nx.number_of_nodes(G)
     return d
@@ -520,17 +519,19 @@ def dc_list(G,file,sheet):
     nrows = mySheet.nrows
     clist = []
     #clist.append((2*nx.number_of_nodes(G),1))
-    for i in range(1, nrows):
+    for i in tqdm(range(1, nrows),desc='计算合并指标'):
         list1 = [i for i in list(mySheet.row_values(i)) if i != '']
-        list1.pop(0)
+        #print('list1',list1)
+        #list1.pop(0)
         sumdegree = 0
         sumcluster = 0
         for j in list1:
-            sumdegree += nx.degree(G,j)
-            sumcluster += nx.clustering(G,j)
+            sumdegree += nx.degree(G,int(j))
+            sumcluster += nx.clustering(G,int(j))
         d = (sumdegree/len(list1),sumcluster/len(list1))
         clist.append(d)
     #clist.append((2*nx.number_of_nodes(G),1))
+    #print('clist:',clist)
     return clist
 
 def comb(G,k,file,w1,w2):
@@ -829,7 +830,7 @@ def part_comb(G,k,file,w1,w2):
     mySheet2 = workbook.sheet_by_name('Sheet2')
     mySheet3 = workbook.sheet_by_name('Sheet3')
     mySheet4 = workbook.sheet_by_name('Sheet4')
-    workbook = xlsxwriter.Workbook('test1.xlsx')
+    workbook = xlsxwriter.Workbook('test11.xlsx')
     worksheet1 = workbook.add_worksheet()
     worksheet2 = workbook.add_worksheet()
     worksheet3 = workbook.add_worksheet()
@@ -846,9 +847,12 @@ def part_comby_sheet(k,mySheet,worksheet):
     nrows = mySheet.nrows
     row = 1
     for i in range(1,nrows):
+        #print(i)
         list1 = [i for i in list(mySheet.row_values(i)) if i != '']
-        list1.pop(0)
+        #list1.pop(0)   #??
+        #print(list1)
         if len(list1) >= k:
+            #print(list1)
             col = 1
             for j in list1:
                 worksheet.write(row,col,j)
@@ -859,16 +863,16 @@ def part_comby_sheet(k,mySheet,worksheet):
     return klist
 
 def add_clist(G,k,klist1,klist2,klist3,klist4,w1,w2,file):
-    clist1 = dc_list(G, 'test1.xlsx','Sheet1')
-    clist2 = dc_list(G, 'test1.xlsx','Sheet2')
-    clist3 = dc_list(G, 'test1.xlsx','Sheet3')
-    clist4 = dc_list(G, 'test1.xlsx','Sheet4')
-    workbook = xlrd.open_workbook('test1.xlsx')
+    clist1 = dc_list(G, 'test11.xlsx','Sheet1')
+    clist2 = dc_list(G, 'test11.xlsx','Sheet2')
+    clist3 = dc_list(G, 'test11.xlsx','Sheet3')
+    clist4 = dc_list(G, 'test11.xlsx','Sheet4')
+    workbook = xlrd.open_workbook('test11.xlsx')
     mySheet1 = workbook.sheet_by_name('Sheet1')
     mySheet2 = workbook.sheet_by_name('Sheet2')
     mySheet3 = workbook.sheet_by_name('Sheet3')
     mySheet4 = workbook.sheet_by_name('Sheet4')
-    workbook = xlsxwriter.Workbook('com-' + str(file))
+    workbook = xlsxwriter.Workbook('com-test' + str(file))
     worksheet1 = workbook.add_worksheet()
     worksheet2 = workbook.add_worksheet()
     worksheet3 = workbook.add_worksheet()
@@ -889,10 +893,10 @@ def add_clistby_sheet(G,k,klist,clist,w1,w2,mysheet,worksheet):
     for m in range(1, mysheet.nrows):
         list_m = [i for i in list(mysheet.row_values(m)) if i != '']
         len_list.append(len(list_m))
-    for i in klist:
+    for i in tqdm(klist):
         for j in i:
             mlist = []
-            d1 = (nx.degree(G,j),nx.clustering(G,j))
+            d1 = (nx.degree(G,int(j)),nx.clustering(G,int(j)))
             for n in clist:
                 if d1[0] != 0 and d1[1] != 0:
                     d = w1 * abs((d1[0] - n[0]) / d1[0]) + w2 * abs(
@@ -1047,12 +1051,15 @@ def G_id(G,name):
     G_id = nx.convert_node_labels_to_integers(G_un)
     same_degree(G,name)
     R_division(G_id, 3, name)
-    comb(G_id,3,name+'-3-rdivision.xlsx',0.5,0.5)
-    comb(G_id,4,name+'-3-rdivision.xlsx',0.5,0.5)
-    part(G_id,'com-3anoymous-' + name + '-3-rdivision.xlsx',3)
-    part(G_id,'com-4anoymous-' + name + '-3-rdivision.xlsx',4)
-    part_comb(G_id,3,'part-com-3anoymous-' + name + '-3-rdivision.xlsx',0.5,0.5)
-    part_comb(G_id,4,'part-com-4anoymous-' + name + '-3-rdivision.xlsx',0.5,0.5)
+    comb(G_id,5,name+'-3-rdivision.xlsx',0.5,0.5)
+    comb(G_id,10,name+'-3-rdivision.xlsx',0.5,0.5)
+    comb(G_id,15,name+'-3-rdivision.xlsx',0.5,0.5)
+    part(G_id,'com-5anoymous-' + name + '-3-rdivision.xlsx',5)
+    part(G_id,'com-10anoymous-' + name + '-3-rdivision.xlsx',10)
+    part(G_id, 'com-15anoymous-' + name + '-3-rdivision.xlsx', 15)
+    part_comb(G_id,5,'part-com-5anoymous-' + name + '-3-rdivision.xlsx',0.5,0.5)
+    part_comb(G_id,10,'part-com-10anoymous-' + name + '-3-rdivision.xlsx',0.5,0.5)
+    part_comb(G_id, 15, 'part-com-15anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
 
 if __name__ == '__main__':
     G_1 = nx.read_gml('1.gml',label=None)
@@ -1064,13 +1071,39 @@ if __name__ == '__main__':
     G_net = nx.read_gml('netscience.gml')
     G_pol = nx.read_gml('polbooks.gml')
     G_HepPh = nx.read_edgelist('CA-HepPh.txt')
-    G_HepTh = nx.read_edgelist('CA-HepTh.txt')
+    #G_HepTh = nx.read_edgelist('CA-HepTh.txt')
     #G_lj = nx.read_edgelist('com-lj.ungraph.txt')
-    G_Email = nx.read_edgelist('Email-Enron.txt')
+    #G_Email = nx.read_edgelist('Email-Enron.txt')
+    #G_face = nx.read_edgelist('facebook_combined.txt')
+    #list_face = list(max(nx.connected_components(G_face)))
+    #G_face_connect = nx.subgraph(G_face,list_face)
     #draw_pict_dependon_degree(G_net,'G_1')
-    G_list = [G_1,G_dol,G_foot,G_kar,G_les,G_net,G_pol,G_HepPh,G_HepTh,G_Email]
+    #G_list = [G_1,G_dol,G_foot,G_kar,G_les,G_net,G_pol,G_HepPh,G_HepTh,G_Email]
     G_name_list = ['G_1', 'G_dol', 'G_foot', 'G_kar', 'G_les', 'G_net', 'G_pol', 'G_HepPh', 'G_HepTh', 'G_Email']
     test = ['106','214','213','259']
+    #print(sorted(nx.degree(G_Email),key=lambda x:x[1],reverse=True))
+    #print(sorted(nx.degree(G_HepTh),key=lambda x:x[1],reverse=True))
+    #G_id(G_kar,'kar-id')
+    G_face = nx.read_edgelist('facebook_combined.txt')
+    G_HepTh = nx.read_edgelist('CA-HepTh.txt')
+    G_Email = nx.read_edgelist('Email-Enron.txt')
+    G_face = nx.convert_node_labels_to_integers(G_face)
+    G_Email = nx.convert_node_labels_to_integers(G_Email)
+    G_HepTh = nx.convert_node_labels_to_integers(G_HepTh)
+    list_face = list(max(nx.connected_components(G_face)))
+    list_email = list(max(nx.connected_components(G_Email)))
+    list_HepTh = list(max(nx.connected_components(G_HepTh)))
+    G_face_connect = nx.subgraph(G_face, list_face)
+    G_Email_connect = nx.subgraph(G_Email, list_email)
+    G_HepTh_connect = nx.subgraph(G_HepTh,list_HepTh)
+    G_face_connect = nx.convert_node_labels_to_integers(G_face_connect)
+    G_Email_connect = nx.convert_node_labels_to_integers(G_Email_connect)
+    G_HepTh_connect = nx.convert_node_labels_to_integers(G_HepTh_connect)
+    part_comb(G_face_connect,5,'part-com-5anoymous-face-id-convert-3-rdivision.xlsx',0.5,0.5)
+
+    #G_id(G_face_connect,'face-id-convert')
+    #print(nx.degree(G_Email_connect,80))
+    #print(nx.degree(G_face_connect,'2'))
     #R_division(G_1, 3, '1-id')
     #comb(G_1,3,'1-id-3-rdivision.xlsx',0.5,0.5)
     #comb(G_1,4,'1-id-3-rdivision.xlsx',0.5,0.5)
