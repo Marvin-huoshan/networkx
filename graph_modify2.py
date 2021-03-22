@@ -14,8 +14,37 @@ import os
 
 def Adjacency(G):
     '''根据输入图，生成邻接矩阵、仅二跳可达矩阵、仅三跳可达矩阵,矩阵按照G.nodes()的顺序'''
-    A = np.array(nx.adjacency_matrix(G).todense())  # 邻接矩阵
-    print('A*A')
+    AS = np.array(nx.adjacency_matrix(G).todense())  # 邻接矩阵
+    A2S = np.dot(AS,AS)
+    A3S = np.dot(A2S,AS)
+    A4S = np.dot(A3S,AS)
+    A5S = np.dot(A4S,AS)
+    # 非零值归1
+    AS[np.nonzero(AS)] = 1
+    A2S[np.nonzero(A2S)] = 1
+    A3S[np.nonzero(A3S)] = 1
+    A4S[np.nonzero(A4S)] = 1
+    A5S[np.nonzero(A5S)] = 1
+    #n跳矩阵
+    A2 = A2S - AS
+    A3 = A3S - A2S
+    A4 = A4S - A3S
+    A5 = A5S - A4S
+    #非1值归0
+    A2[A2 != 1] = 0
+    A3[A3 != 1] = 0
+    A4[A4 != 1] = 0
+    A5[A5 != 1] = 0
+    #对角线归0
+    row,col = np.diag_indices_from(A2)
+    A2[row,col] = 0
+    row, col = np.diag_indices_from(A3)
+    A3[row, col] = 0
+    row, col = np.diag_indices_from(A4)
+    A4[row, col] = 0
+    row, col = np.diag_indices_from(A5)
+    A5[row, col] = 0
+    '''print('A*A')
     A2s = np.dot(A, A)  # A2s
     row, col = np.diag_indices_from(A2s)
     print('duijiao->0')
@@ -36,8 +65,8 @@ def Adjacency(G):
     print('A3s - A2s')
     A3 = A3s - A2s
     print('config A3:')
-    A3[A3 < 0] = 0  # 仅三跳可达矩阵
-    return A,A2,A3
+    A3[A3 < 0] = 0  # 仅三跳可达矩阵'''
+    return A2,A3,A4,A5
 
 def read_file(G,file):
     '''lists中存储了四个sheet的不同类，每一个小list按照度排序'''
@@ -79,7 +108,7 @@ def do_by_graph(G,file,num,name):
     print(nx.number_of_edges(G))
     unfrozen_graph = nx.Graph(frozen_graph)
     print(nx.number_of_edges(unfrozen_graph))
-    A, A2, A3 = Adjacency(G)
+    A2, A3, A4, A5 = Adjacency(G)
     lists = read_file(G, file)
     for i in lists[num-1]:
         max = i.pop(0)
@@ -88,28 +117,30 @@ def do_by_graph(G,file,num,name):
             #edit_list[int(j)-1] = nx.degree(G, max) - nx.degree(G, j)  #id从1开始
             edit_list[int(j)] = nx.degree(G,max) - nx.degree(G,j)   #id从0开始
     print(edit_list)
-    process_by_id(G,unfrozen_graph,edit_list,A,A2,A3)
+    process_by_id(G,unfrozen_graph,edit_list,A2,A3,A4,A5)
     nx.write_gml(unfrozen_graph,name+'.gml')
     print(nx.number_of_edges(G))
     print(len(nx.edges(unfrozen_graph)))
 
-def process_by_id(origin_graph,unfrozen_graph,edit_list,A,A2,A3):
+def process_by_id(origin_graph,unfrozen_graph,edit_list,A2,A3,A4,A5):
     '''处理一个类'''
     for i,j in zip(range(len(edit_list)),edit_list):
         if j != 0:
-            addedges(i,j,unfrozen_graph,A,A2,A3)
+            addedges(i,j,unfrozen_graph,A2,A3)
     print('edit_lisr1:',edit_list)
     if flag == 1:
+        print('4,5跳')
         #三跳可达矩阵无法满足，更新矩阵，最高到6跳
-        A,A2,A3 = Adjacency(unfrozen_graph)
+        #A,A2,A3 = Adjacency(unfrozen_graph)
         for i, j in zip(range(len(edit_list)), edit_list):
             if j != 0:
-                addedges(i, j, unfrozen_graph, A, A2, A3)
+                addedges(i, j, unfrozen_graph, A4,A5)
     print('edit_list2:',edit_list)
     list_add_nodes = []
     list_add_value = []
     added_list = []
     if max(edit_list) != 0:
+        print(edit_list)
         print('!')
         print('edit_list3:',edit_list)
         #六跳内无法满足，直接加点
@@ -132,7 +163,7 @@ def process_by_id(origin_graph,unfrozen_graph,edit_list,A,A2,A3):
                 unfrozen_graph.add_edge(i,m)
                 print('add edge:',str(i),',',str(m))
 
-def addedges(row,num,unfrozen_graph,A,A2,A3):
+def addedges(row,num,unfrozen_graph,A2,A3):
     '''进行加边操作'''
     global flag
     flag = 0
@@ -161,8 +192,8 @@ def addedges(row,num,unfrozen_graph,A,A2,A3):
         num -= 1
         edit_list[row] -= 1
         edit_list[col] -= 1
-        A[row][col] = 1
-        A[col][row] = 1
+        #A[row][col] = 1
+        #A[col][row] = 1
         if flag == 0:
             A2[row][col] = 0
             A2[col][row] = 0
@@ -222,15 +253,20 @@ if __name__ == '__main__':
     G_Email_connect = nx.convert_node_labels_to_integers(G_Email_connect)
     G_HepPh = nx.read_edgelist('CA-HepPh.txt')
     G_HepPh = nx.convert_node_labels_to_integers(G_HepPh)
-    G_kar_un = G_kar.to_undirected()
+    G_kar = nx.convert_node_labels_to_integers(G_kar)
     G_1_un = G_1.to_undirected()
+    G_dol = nx.read_gml('dolphins.gml')
+    G_dol = nx.convert_node_labels_to_integers(G_dol)
+    G_foot = nx.read_gml('football.gml')
+    G_foot = nx.convert_node_labels_to_integers(G_foot)
     p = Pool(processes=18)
-    for i in tqdm(range(2, 5), desc='ex'):
-        p.apply_async(do_by_graph, args=(G_Email_connect, 'com-part-com-5anoymous-Email-id-connect-3-rdivision.xlsx', i, 'Email-nect-5-sheet' + str(i)))
+    '''for i in tqdm(range(2, 5), desc='ex'):
+        p.apply_async(do_by_graph, args=(G_kar_un, 'com-part-com-4anoymous-kar-id-connect-3-rdivision.xlsx', i, 'Email-nect-4-sheet' + str(i)))
         #p.apply_async(do_by_graph, args=(G_Email_connect, 'com-part-com-10anoymous-Email-id-connect-3-rdivision.xlsx', i,'Email-nect-10-sheet' + str(i)))
         #p.apply_async(do_by_graph, args=(G_Email_connect, 'com-part-com-15anoymous-Email-id-connect-3-rdivision.xlsx', i,'Email-nect-15-sheet' + str(i)))
     p.close()
-    p.join()
+    p.join()'''
+    do_by_graph(G_dol,'com-part-com-4anoymous-dol-id-3-rdivision.xlsx',2,'dol-nect-4-sheet2')
     #do_by_graph(G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx',)
     #do_by_graph(G_HepTh_connect,'com-part-com-10anoymous-HepTh-id-3-rdivision.xlsx',1,'HepTh-10-sheet1')
     #do_by_graph(G_1_un, 'com-part-com-3anoymous-1-id-3-rdivision.xlsx',4,'1-sheet4')
