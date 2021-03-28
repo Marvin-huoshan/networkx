@@ -17,15 +17,20 @@ import scipy.sparse as sp
 def Adjacency(G):
     '''根据输入图，生成邻接矩阵、仅二跳可达矩阵、仅三跳可达矩阵,矩阵按照G.nodes()的顺序'''
     start = time.time()
-    ASS = sp.coo_matrix(nx.adjacency_matrix(G))
-    AS = np.array(nx.adjacency_matrix(G).todense())  # 邻接矩阵
-    A2S = np.dot(ASS,ASS).todense()
-    A22S = sp.coo_matrix(A2S)
-    A3S = np.dot(A22S,AS).todense()
-    A33S = sp.coo_matrix(A3S)
-    A4S = np.dot(A33S,AS).todense()
-    A44S = sp.coo_matrix(A4S)
-    A5S = np.dot(A44S,AS).todense()
+    AS = sp.coo_matrix(nx.adjacency_matrix(G))
+    #AS = np.array(nx.adjacency_matrix(G).todense())  # 邻接矩阵
+    A2S = np.dot(AS,AS)
+    #A22S = sp.coo_matrix(A2S)
+    A3S = np.dot(A2S,AS)
+    #A33S = sp.coo_matrix(A3S)
+    A4S = np.dot(A3S,AS)
+    #A44S = sp.coo_matrix(A4S)
+    A5S = np.dot(A4S,AS)
+    AS = AS.todense()
+    A2S = A2S.todense()
+    A3S = A3S.todense()
+    A4S = A4S.todense()
+    A5S = A5S.todense()
     print(time.time()-start)
     # 非零值归1
     print('zero->1')
@@ -78,6 +83,11 @@ def Adjacency(G):
     A3 = A3s - A2s
     print('config A3:')
     A3[A3 < 0] = 0  # 仅三跳可达矩阵'''
+    #o_array for add_edges list
+    A2 = np.array(A2)
+    A3 = np.array(A3)
+    A4 = np.array(A4)
+    A5 = np.array(A5)
     return A2,A3,A4,A5
 
 def read_file(G,file):
@@ -128,11 +138,11 @@ def do_by_graph(G,file,num,name):
             '''创建待修改列表'''
             #edit_list[int(j)-1] = nx.degree(G, max) - nx.degree(G, j)  #id从1开始
             edit_list[int(j)] = nx.degree(G,max) - nx.degree(G,j)   #id从0开始
-    print(edit_list)
+    #print(edit_list)
     process_by_id(G,unfrozen_graph,edit_list,A2,A3,A4,A5)
     nx.write_gml(unfrozen_graph,name+'.gml')
     print(nx.number_of_edges(G))
-    print(len(nx.edges(unfrozen_graph)))
+    #print(len(nx.edges(unfrozen_graph)))
 
 def process_by_id(origin_graph,unfrozen_graph,edit_list,A2,A3,A4,A5):
     '''处理一个类'''
@@ -186,6 +196,7 @@ def addedges(row,num,unfrozen_graph,A2,A3):
         id_list = list(A2[row][:])
         print('node:',row)
         print(num)
+        #print('id_list:',id_list)
         if max(id_list) == 0:
             break
         id_match = id_list.index(1)
@@ -281,36 +292,19 @@ if __name__ == '__main__':
     for i in tqdm(range(2, 5), desc='ex'):
         p.apply_async(do_by_graph, args=(
         G_Email_connect, 'com-part-com-5anoymous-Email-id-convert-3-rdivision.xlsx', i,
-        'Email-nect-5-sheet' + str(i)))
+        'Email-nect-conv-5-sheet' + str(i)))
         p.apply_async(do_by_graph, args=(
         G_Email_connect, 'com-part-com-10anoymous-Email-id-convert-3-rdivision.xlsx', i,
-        'Email-nect-10-sheet' + str(i)))
+        'Email-nect-conv-10-sheet' + str(i)))
         p.apply_async(do_by_graph, args=(
         G_Email_connect, 'com-part-com-15anoymous-Email-id-convert-3-rdivision.xlsx', i,
-        'Email-nect-15-sheet' + str(i)))
-        p.apply_async(do_by_graph, args=(G_Email_connect, 'com-part-com-20anoymous-Email-id-convert-3-rdivision.xlsx', i, 'Email-nect-20-sheet' + str(i)))
-        p.apply_async(do_by_graph, args=(G_Email_connect, 'com-part-com-25anoymous-Email-id-convert-3-rdivision.xlsx', i,'Email-nect-25-sheet' + str(i)))
-        p.apply_async(do_by_graph, args=(G_Email_connect, 'com-part-com-30anoymous-Email-id-convert-3-rdivision.xlsx', i,'Email-nect-30-sheet' + str(i)))
-        p.apply_async(do_by_graph, args=(
-            G_HepTh_connect, 'com-part-com-5anoymous-HepTh-id-convert-3-rdivision.xlsx', i,
-            'HepTh-nect-5-sheet' + str(i)))
-        p.apply_async(do_by_graph, args=(
-            G_HepTh_connect, 'com-part-com-10anoymous-HepTh-id-convert-3-rdivision.xlsx', i,
-            'HepTh-nect-10-sheet' + str(i)))
-        p.apply_async(do_by_graph, args=(
-            G_HepTh_connect, 'com-part-com-15anoymous-HepTH-id-convert-3-rdivision.xlsx', i,
-            'HepTh-nect-15-sheet' + str(i)))
-        p.apply_async(do_by_graph, args=(
-        G_HepTh_connect, 'com-part-com-20anoymous-HepTh-id-convert-3-rdivision.xlsx', i,
-        'HepTh-nect-20-sheet' + str(i)))
-        p.apply_async(do_by_graph, args=(
-        G_HepTh_connect, 'com-part-com-25anoymous-HepTh-id-convert-3-rdivision.xlsx', i,
-        'HepTh-nect-25-sheet' + str(i)))
-        p.apply_async(do_by_graph, args=(
-        G_HepTh_connect, 'com-part-com-30anoymous-HepTh-id-convert-3-rdivision.xlsx', i,
-        'HepTh-nect-30-sheet' + str(i)))
+        'Email-nect-conv-15-sheet' + str(i)))
+        #p.apply_async(do_by_graph, args=(G_HepTh_connect, 'com-part-com-20anoymous-HepTh-id-convert-3-rdivision.xlsx', i, 'HepTh-nect-20-sheet' + str(i)))
+        #p.apply_async(do_by_graph, args=(G_HepTh_connect, 'com-part-com-25anoymous-HepTh-id-convert-3-rdivision.xlsx', i,'HepTh-nect-25-sheet' + str(i)))
+        #p.apply_async(do_by_graph, args=(G_HepTh_connect, 'com-part-com-30anoymous-HepTh-id-convert-3-rdivision.xlsx', i,'HepTh-nect-30-sheet' + str(i)))
     p.close()
     p.join()
+    #do_by_graph(G_Email_connect,'com-part-com-5anoymous-Email-id-connect-3-rdivision.xlsx',2,'testt')
     #do_by_graph(G_dol,'com-part-com-4anoymous-dol-id-3-rdivision.xlsx',2,'dol-nect-4-sheet2')
     #do_by_graph(G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx',)
     #do_by_graph(G_HepTh_connect,'com-part-com-10anoymous-HepTh-id-3-rdivision.xlsx',1,'HepTh-10-sheet1')
