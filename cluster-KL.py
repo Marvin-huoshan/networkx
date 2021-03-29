@@ -872,7 +872,7 @@ def add_clist(G,k,klist1,klist2,klist3,klist4,w1,w2,file):
     mySheet2 = workbook.sheet_by_name('Sheet2')
     mySheet3 = workbook.sheet_by_name('Sheet3')
     mySheet4 = workbook.sheet_by_name('Sheet4')
-    workbook = xlsxwriter.Workbook('com-test' + str(file))
+    workbook = xlsxwriter.Workbook('com-' + str(file))
     worksheet1 = workbook.add_worksheet()
     worksheet2 = workbook.add_worksheet()
     worksheet3 = workbook.add_worksheet()
@@ -1048,18 +1048,27 @@ def get_bigger_percent(G,name):
 def G_id(G,name):
     '''图的节点按照id从零开始编号，生成一系列文件'''
     G_un = G.to_undirected()
-    G_id = nx.convert_node_labels_to_integers(G_un)
+    G_id = G
     same_degree(G,name)
     R_division(G_id, 3, name)
     comb(G_id,5,name+'-3-rdivision.xlsx',0.5,0.5)
     comb(G_id,10,name+'-3-rdivision.xlsx',0.5,0.5)
     comb(G_id,15,name+'-3-rdivision.xlsx',0.5,0.5)
+    comb(G_id, 20, name + '-3-rdivision.xlsx', 0.5, 0.5)
+    comb(G_id, 25, name + '-3-rdivision.xlsx', 0.5, 0.5)
+    comb(G_id, 30, name + '-3-rdivision.xlsx', 0.5, 0.5)
     part(G_id,'com-5anoymous-' + name + '-3-rdivision.xlsx',5)
     part(G_id,'com-10anoymous-' + name + '-3-rdivision.xlsx',10)
     part(G_id, 'com-15anoymous-' + name + '-3-rdivision.xlsx', 15)
+    part(G_id, 'com-20anoymous-' + name + '-3-rdivision.xlsx', 20)
+    part(G_id, 'com-25anoymous-' + name + '-3-rdivision.xlsx', 25)
+    part(G_id, 'com-30anoymous-' + name + '-3-rdivision.xlsx', 30)
     part_comb(G_id,5,'part-com-5anoymous-' + name + '-3-rdivision.xlsx',0.5,0.5)
     part_comb(G_id,10,'part-com-10anoymous-' + name + '-3-rdivision.xlsx',0.5,0.5)
     part_comb(G_id, 15, 'part-com-15anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
+    part_comb(G_id, 20, 'part-com-20anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
+    part_comb(G_id, 25, 'part-com-25anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
+    part_comb(G_id, 30, 'part-com-30anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
 
 if __name__ == '__main__':
     G_1 = nx.read_gml('1.gml',label=None)
@@ -1099,8 +1108,8 @@ if __name__ == '__main__':
     G_face_connect = nx.convert_node_labels_to_integers(G_face_connect)
     G_Email_connect = nx.convert_node_labels_to_integers(G_Email_connect)
     G_HepTh_connect = nx.convert_node_labels_to_integers(G_HepTh_connect)
-    part_comb(G_face_connect,5,'part-com-5anoymous-face-id-convert-3-rdivision.xlsx',0.5,0.5)
-
+    #part_comb(G_face_connect,5,'part-com-5anoymous-face-id-convert-3-rdivision.xlsx',0.5,0.5)
+    G_id(G_face_connect,'face-id-convert')
     #G_id(G_face_connect,'face-id-convert')
     #print(nx.degree(G_Email_connect,80))
     #print(nx.degree(G_face_connect,'2'))
