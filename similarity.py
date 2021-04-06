@@ -41,6 +41,7 @@ def sim(G,file_list,name):
     worksheet = workbook.add_worksheet()
     row = 0;col = 0
     for i in tqdm(file_list,desc='ex:'):
+        print(i)
         G_modify = nx.read_gml(i)
         worksheet.write(row,col,name)
         col += 1
@@ -158,6 +159,8 @@ if __name__ == '__main__':
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
     G_1 = nx.read_gml('1.gml', label=None)
     G_HepTh = nx.read_edgelist('CA-HepTh.txt')
+    G_Email = nx.read_edgelist('Email-Enron.txt')
+    G_face = nx.read_edgelist('facebook_combined.txt')
     list_HepTh = list(max(nx.connected_components(G_HepTh)))
     G_HepTh_connect = nx.subgraph(G_HepTh, list_HepTh)
     G_HepTh_connect = nx.convert_node_labels_to_integers(G_HepTh_connect)
@@ -165,23 +168,42 @@ if __name__ == '__main__':
     G_HepPh = nx.convert_node_labels_to_integers(G_HepPh)
     G_kar_un = G_kar.to_undirected()
     G_1_un = G_1.to_undirected()
-    G_1_anoy_1 = nx.read_gml('1-sheet1.gml')
-    G_1_anoy_2 = nx.read_gml('1-sheet2.gml')
-    G_1_anoy_3 = nx.read_gml('1-sheet3.gml')
-    G_1_anoy_4 = nx.read_gml('1-sheet4.gml')
-    G_kar_anoy_1 = nx.read_gml('kar-sheet1.gml')
-    G_kar_anoy_2 = nx.read_gml('kar-sheet2.gml')
-    G_kar_anoy_3 = nx.read_gml('kar-sheet3.gml')
-    G_kar_anoy_4 = nx.read_gml('kar-sheet4.gml')
-    HepTh_list = ['HepTh-nect-5-sheet2.gml','HepTh-nect-5-sheet3.gml','HepTh-nect-5-sheet4.gml',
-                  'HepTh-nect-10-sheet2.gml','HepTh-nect-10-sheet3.gml','HepTh-nect-10-sheet4.gml',
-                  'HepTh-nect-15-sheet2.gml','HepTh-nect-15-sheet3.gml','HepTh-nect-15-sheet4.gml']
-    HepTh_list = ['HepTh-nect-5-sheet2.gml']
-    G_HepTh_5anoy2 = nx.read_gml('HepTh-nect-5-sheet2.gml')
-    G_HepTh_5anoy2 = nx.convert_node_labels_to_integers(G_HepTh_5anoy2)
+    #G_1_anoy_1 = nx.read_gml('1-sheet1.gml')
+    #G_1_anoy_2 = nx.read_gml('1-sheet2.gml')
+    #G_1_anoy_3 = nx.read_gml('1-sheet3.gml')
+    #G_1_anoy_4 = nx.read_gml('1-sheet4.gml')
+    #G_kar_anoy_1 = nx.read_gml('kar-sheet1.gml')
+    #G_kar_anoy_2 = nx.read_gml('kar-sheet2.gml')
+    #G_kar_anoy_3 = nx.read_gml('kar-sheet3.gml')
+    #G_kar_anoy_4 = nx.read_gml('kar-sheet4.gml')
+    HepTh_list = ['HepTh-nect-conv-5-sheet2.gml','HepTh-nect-conv-5-sheet3.gml','HepTh-nect-conv-5-sheet4.gml',
+                  'HepTh-nect-conv-10-sheet2.gml','HepTh-nect-conv-10-sheet3.gml','HepTh-nect-conv-10-sheet4.gml',
+                  'HepTh-nect-conv-15-sheet2.gml','HepTh-nect-conv-15-sheet3.gml','HepTh-nect-conv-15-sheet4.gml',
+                  'HepTh-nect-conv-20-sheet2.gml', 'HepTh-nect-conv-20-sheet3.gml', 'HepTh-nect-conv-20-sheet4.gml',
+                  'HepTh-nect-conv-25-sheet2.gml', 'HepTh-nect-conv-25-sheet3.gml', 'HepTh-nect-conv-25-sheet4.gml',
+                  'HepTh-nect-conv-30-sheet2.gml', 'HepTh-nect-conv-30-sheet3.gml', 'HepTh-nect-conv-30-sheet4.gml'
+                  ]
+    face_list = ['face-nect-conv-5-sheet2.gml','face-nect-conv-5-sheet3.gml','face-nect-conv-5-sheet4.gml',
+                  'face-nect-conv-10-sheet2.gml','face-nect-conv-10-sheet3.gml','face-nect-conv-10-sheet4.gml',
+                  'face-nect-conv-15-sheet2.gml','face-nect-conv-15-sheet3.gml','face-nect-conv-15-sheet4.gml',
+                 'face-nect-conv-20-sheet2.gml', 'face-nect-conv-20-sheet3.gml', 'face-nect-conv-20-sheet4.gml',
+                 'face-nect-conv-25-sheet2.gml', 'face-nect-conv-25-sheet3.gml', 'face-nect-conv-25-sheet4.gml',
+                 'face-nect-conv-30-sheet2.gml', 'face-nect-conv-30-sheet3.gml', 'face-nect-conv-30-sheet4.gml'
+                 ]
+    Email_list = ['Email-nect-conv-5-sheet2.gml','Email-nect-conv-5-sheet3.gml','Email-nect-conv-5-sheet4.gml',
+                  'Email-nect-conv-10-sheet2.gml','Email-nect-conv-10-sheet3.gml','Email-nect-conv-10-sheet4.gml',
+                  'Email-nect-conv-15-sheet2.gml','Email-nect-conv-15-sheet3.gml','Email-nect-conv-15-sheet4.gml',
+                  'Email-nect-conv-20-sheet2.gml', 'Email-nect-conv-20-sheet3.gml', 'Email-nect-conv-20-sheet4.gml',
+                  'Email-nect-conv-25-sheet2.gml', 'Email-nect-conv-25-sheet3.gml', 'Email-nect-conv-25-sheet4.gml',
+                  'Email-nect-conv-30-sheet2.gml', 'Email-nect-conv-30-sheet3.gml', 'Email-nect-conv-30-sheet4.gml'
+                  ]
+    #G_HepTh_5anoy2 = nx.read_gml('HepTh-nect-5-sheet2.gml')
+    #G_HepTh_5anoy2 = nx.convert_node_labels_to_integers(G_HepTh_5anoy2)
     #indexs(G_HepTh_connect,'HepTh_connect_index')
     #subgraph_sim(G_HepTh_5anoy2,G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx')
-    sim(G_HepTh,HepTh_list,'G_HepTh')
+    sim(G_HepTh,HepTh_list,'G_HepTh_conv')
+    sim(G_Email,Email_list,'G_Email_conv')
+    sim(G_face,face_list,'G_face_conv')
     '''print(2*nx.number_of_edges(G_kar)/nx.number_of_nodes(G_kar))
     print(2*nx.number_of_edges(G_kar_anoy_1)/nx.number_of_nodes(G_kar_anoy_1))
     print(2 * nx.number_of_edges(G_1) / nx.number_of_nodes(G_1))
