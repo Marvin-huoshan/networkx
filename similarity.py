@@ -43,7 +43,7 @@ def sim(G,file_list,name):
     for i in tqdm(file_list,desc='ex:'):
         print(i)
         G_modify = nx.read_gml(i)
-        worksheet.write(row,col,name)
+        worksheet.write(2 * row,col,name)
         col += 1
         print('G_connect edges:',nx.number_of_edges(G_connect))
         print('G_modify edges:',nx.number_of_edges(G_modify))
@@ -63,15 +63,15 @@ def sim(G,file_list,name):
         print('G_modify ACC:', avg_cluster(G_modify))
         print('平均聚类系数改变量：', avg_cluster(G_modify) - avg_cluster(G_connect))
         ACC = avg_cluster(G_modify) - avg_cluster(G_connect)
-        worksheet.write(3 * row,col,ACC)
-        worksheet.write(3 * row + 1,col,ACC / avg_cluster(G_connect))
+        worksheet.write(2 * row,col,ACC)
+        worksheet.write(2 * row + 1,col,ACC / avg_cluster(G_connect))
         col += 1
         print('G_connect APL:', avg_shortest_path(G_connect))
         print('G_modify APL:', avg_shortest_path(G_modify))
         print('平均最短路径改变量：', avg_shortest_path(G_modify) - avg_shortest_path(G_connect))
         APL = avg_shortest_path(G_modify) - avg_shortest_path(G_connect)
-        worksheet.write(4 * row,col,APL)
-        worksheet.write(4 * row + 1,col,APL / avg_shortest_path(G_connect))
+        worksheet.write(2 * row,col,APL)
+        worksheet.write(2 * row + 1,col,APL / avg_shortest_path(G_connect))
         col += 1
         sum1 = 0
         sum2 = 0
@@ -85,8 +85,10 @@ def sim(G,file_list,name):
         print('G_modify ABC:', sum2 / nx.number_of_nodes(G_modify))
         print('平均中心性改变量：', sum2 / nx.number_of_nodes(G_modify) - sum1 / nx.number_of_nodes(G_connect))
         ABC = sum2 / nx.number_of_nodes(G_modify) - sum1 / nx.number_of_nodes(G_connect)
-        worksheet.write(5 * row,col,ABC)
-        worksheet.write(5 * row + 1,col,ABC / (sum1 / nx.number_of_nodes(G_connect)))
+        worksheet.write(2 * row,col,ABC)
+        worksheet.write(2 * row + 1,col,ABC / (sum1 / nx.number_of_nodes(G_connect)))
+        row += 1
+        col = 0
     workbook.close()
 
 def subgraph_sim(G,G_origin,file):
@@ -197,13 +199,17 @@ if __name__ == '__main__':
                   'Email-nect-conv-25-sheet2.gml', 'Email-nect-conv-25-sheet3.gml', 'Email-nect-conv-25-sheet4.gml',
                   'Email-nect-conv-30-sheet2.gml', 'Email-nect-conv-30-sheet3.gml', 'Email-nect-conv-30-sheet4.gml'
                   ]
+    test_list = [
+        'face-nect-conv-5-sheet2.gml', 'face-nect-conv-5-sheet3.gml','face-nect-conv-5-sheet4.gml'
+    ]
     #G_HepTh_5anoy2 = nx.read_gml('HepTh-nect-5-sheet2.gml')
     #G_HepTh_5anoy2 = nx.convert_node_labels_to_integers(G_HepTh_5anoy2)
     #indexs(G_HepTh_connect,'HepTh_connect_index')
     #subgraph_sim(G_HepTh_5anoy2,G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx')
-    sim(G_HepTh,HepTh_list,'G_HepTh_conv')
-    sim(G_Email,Email_list,'G_Email_conv')
-    sim(G_face,face_list,'G_face_conv')
+    sim(G_face,test_list,'test_conv')
+    #sim(G_HepTh,HepTh_list,'G_HepTh_conv')
+    #sim(G_Email,Email_list,'G_Email_conv')
+    #sim(G_face,face_list,'G_face_conv')
     '''print(2*nx.number_of_edges(G_kar)/nx.number_of_nodes(G_kar))
     print(2*nx.number_of_edges(G_kar_anoy_1)/nx.number_of_nodes(G_kar_anoy_1))
     print(2 * nx.number_of_edges(G_1) / nx.number_of_nodes(G_1))
