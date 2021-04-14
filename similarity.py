@@ -155,7 +155,65 @@ def indexs(G,name):
         worksheet.write(i,2,BC)
         worksheet.write(i,3,LC)
     workbook.close()
+import matplotlib
+from matplotlib import pyplot as plt
+import math
 
+def degree_dis_plot(G,file_list):
+    '''
+    画出度分布图
+    :param G:
+    :param file_list:
+    :return:
+    '''
+    G_modify_5 = nx.read_gml(file_list[0])
+    G_modify_10 = nx.read_gml(file_list[1])
+    G_modify_15 = nx.read_gml(file_list[2])
+    G_modify_20 = nx.read_gml(file_list[3])
+    G_modify_25 = nx.read_gml(file_list[4])
+    dicts_1 = dict(get_degree_count(G))
+    dicts_5 = dict(get_degree_count(G_modify_5))
+    dicts_10 = dict(get_degree_count(G_modify_10))
+    dicts_15 = dict(get_degree_count(G_modify_15))
+    dicts_20 = dict(get_degree_count(G_modify_20))
+    dicts_25 = dict(get_degree_count(G_modify_25))
+    x_1 = list(dicts_1.keys())
+    y_1 = list(dicts_1.values())
+    x_5 = list(dicts_5.keys())
+    y_5 = list(dicts_5.values())
+    x_10 = list(dicts_10.keys())
+    y_10 = list(dicts_10.values())
+    x_15 = list(dicts_15.keys())
+    y_15 = list(dicts_15.values())
+    x_20 = list(dicts_20.keys())
+    y_20 = list(dicts_20.values())
+    x_25 = list(dicts_25.keys())
+    y_25 = list(dicts_25.values())
+    matplotlib.rc('figure', figsize=(8, 8))
+    plt.plot(x_25, y_25, color='c', linestyle='-', marker='+',label='k=25')
+    plt.plot(x_20, y_20, color='y', linestyle='-', marker='x',label='k=20')
+    plt.plot(x_15, y_15, color='g', linestyle='-', marker='s',label='k=15')
+    plt.plot(x_10, y_10, color='b', linestyle='-', marker='v',label='k=10')
+    plt.plot(x_5, y_5, color='r', linestyle='-', marker='*',label='k=5')
+    plt.plot(x_1, y_1, color='k', linestyle='-', marker='.',label='Origin')
+    plt.xlabel('degree')
+    plt.ylabel('log(n)')
+    plt.legend()
+    plt.show()
+
+def get_degree_count(G):
+    '''
+    获得每个图的度值以及其对应个数
+    :return:
+    '''
+    degree = sorted(list(dict(nx.degree(G)).values()), reverse=False)
+    degree_value = sorted(list(set(degree)))
+    degree_count = list()
+    for i in degree_value:
+        degree_count.append(math.log10(degree.count(i)))
+    x = degree_value
+    y = degree_count
+    return zip(x,y)
 
 if __name__ == '__main__':
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
@@ -164,8 +222,14 @@ if __name__ == '__main__':
     G_Email = nx.read_edgelist('Email-Enron.txt')
     G_face = nx.read_edgelist('facebook_combined.txt')
     list_HepTh = list(max(nx.connected_components(G_HepTh)))
+    list_face = list(max(nx.connected_components(G_face)))
+    list_Email = list(max(nx.connected_components(G_Email)))
     G_HepTh_connect = nx.subgraph(G_HepTh, list_HepTh)
+    G_face_conect = nx.subgraph(G_face,list_face)
+    G_Email_connect = nx.subgraph(G_Email,list_Email)
     G_HepTh_connect = nx.convert_node_labels_to_integers(G_HepTh_connect)
+    G_face_conect = nx.convert_node_labels_to_integers(G_face_conect)
+    G_Email_connect = nx.convert_node_labels_to_integers(G_Email_connect)
     G_HepPh = nx.read_edgelist('CA-HepPh.txt')
     G_HepPh = nx.convert_node_labels_to_integers(G_HepPh)
     G_kar_un = G_kar.to_undirected()
@@ -178,36 +242,34 @@ if __name__ == '__main__':
     #G_kar_anoy_2 = nx.read_gml('kar-sheet2.gml')
     #G_kar_anoy_3 = nx.read_gml('kar-sheet3.gml')
     #G_kar_anoy_4 = nx.read_gml('kar-sheet4.gml')
-    HepTh_list = ['HepTh-nect-conv-5-sheet2.gml','HepTh-nect-conv-5-sheet3.gml','HepTh-nect-conv-5-sheet4.gml',
-                  'HepTh-nect-conv-10-sheet2.gml','HepTh-nect-conv-10-sheet3.gml','HepTh-nect-conv-10-sheet4.gml',
-                  'HepTh-nect-conv-15-sheet2.gml','HepTh-nect-conv-15-sheet3.gml','HepTh-nect-conv-15-sheet4.gml',
-                  'HepTh-nect-conv-20-sheet2.gml', 'HepTh-nect-conv-20-sheet3.gml', 'HepTh-nect-conv-20-sheet4.gml',
-                  'HepTh-nect-conv-25-sheet2.gml', 'HepTh-nect-conv-25-sheet3.gml', 'HepTh-nect-conv-25-sheet4.gml',
-                  'HepTh-nect-conv-30-sheet2.gml', 'HepTh-nect-conv-30-sheet3.gml', 'HepTh-nect-conv-30-sheet4.gml'
+    HepTh_list = ['HepTh-nect-conv-5-sheet2.gml',
+                  'HepTh-nect-conv-10-sheet2.gml',
+                  'HepTh-nect-conv-15-sheet2.gml',
+                  'HepTh-nect-conv-20-sheet2.gml',
+                  'HepTh-nect-conv-25-sheet2.gml'
                   ]
-    face_list = ['face-nect-conv-5-sheet2.gml','face-nect-conv-5-sheet3.gml','face-nect-conv-5-sheet4.gml',
-                  'face-nect-conv-10-sheet2.gml','face-nect-conv-10-sheet3.gml','face-nect-conv-10-sheet4.gml',
-                  'face-nect-conv-15-sheet2.gml','face-nect-conv-15-sheet3.gml','face-nect-conv-15-sheet4.gml',
-                 'face-nect-conv-20-sheet2.gml', 'face-nect-conv-20-sheet3.gml', 'face-nect-conv-20-sheet4.gml',
-                 'face-nect-conv-25-sheet2.gml', 'face-nect-conv-25-sheet3.gml', 'face-nect-conv-25-sheet4.gml',
-                 'face-nect-conv-30-sheet2.gml', 'face-nect-conv-30-sheet3.gml', 'face-nect-conv-30-sheet4.gml'
+    face_list = ['face-nect-conv-5-sheet2.gml',
+                  'face-nect-conv-10-sheet2.gml',
+                  'face-nect-conv-15-sheet2.gml',
+                 'face-nect-conv-20-sheet2.gml',
+                 'face-nect-conv-25-sheet2.gml'
                  ]
-    Email_list = ['Email-nect-conv-5-sheet2.gml','Email-nect-conv-5-sheet3.gml','Email-nect-conv-5-sheet4.gml',
-                  'Email-nect-conv-10-sheet2.gml','Email-nect-conv-10-sheet3.gml','Email-nect-conv-10-sheet4.gml',
-                  'Email-nect-conv-15-sheet2.gml','Email-nect-conv-15-sheet3.gml','Email-nect-conv-15-sheet4.gml',
-                  'Email-nect-conv-20-sheet2.gml', 'Email-nect-conv-20-sheet3.gml', 'Email-nect-conv-20-sheet4.gml',
-                  'Email-nect-conv-25-sheet2.gml', 'Email-nect-conv-25-sheet3.gml', 'Email-nect-conv-25-sheet4.gml',
-                  'Email-nect-conv-30-sheet2.gml', 'Email-nect-conv-30-sheet3.gml', 'Email-nect-conv-30-sheet4.gml'
+    Email_list = ['Email-nect-conv-5-sheet2.gml',
+                  'Email-nect-conv-10-sheet2.gml',
+                  'Email-nect-conv-15-sheet2.gml',
+                  'Email-nect-conv-20-sheet2.gml',
+                  'Email-nect-conv-25-sheet2.gml'
                   ]
     test_list = [
         'face-nect-conv-5-sheet2.gml', 'face-nect-conv-5-sheet3.gml','face-nect-conv-5-sheet4.gml'
     ]
+    degree_dis_plot(G_face_conect,face_list)
     #G_HepTh_5anoy2 = nx.read_gml('HepTh-nect-5-sheet2.gml')
     #G_HepTh_5anoy2 = nx.convert_node_labels_to_integers(G_HepTh_5anoy2)
     #indexs(G_HepTh_connect,'HepTh_connect_index')
     #subgraph_sim(G_HepTh_5anoy2,G_HepTh_connect,'com-part-com-5anoymous-HepTh-id-connect-3-rdivision.xlsx')
-    sim(G_face,test_list,'test_conv')
-    #sim(G_HepTh,HepTh_list,'G_HepTh_conv')
+    #sim(G_face,test_list,'test_conv')
+    #print(nx.number_of_nodes())
     #sim(G_Email,Email_list,'G_Email_conv')
     #sim(G_face,face_list,'G_face_conv')
     '''print(2*nx.number_of_edges(G_kar)/nx.number_of_nodes(G_kar))
