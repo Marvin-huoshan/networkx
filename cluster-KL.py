@@ -809,14 +809,19 @@ def matrix_gen(list1,length):
             matrix[i][j] = cont_KL(list1[i],list1[j])
             cont += 1
             #print('进度：{:.2%}'.format(cont / length**2))
-    max = np.max(matrix)
+    #使用Tensor
+    Max = np.max(matrix)
+    matrix_Max = np.ones((length,length))*Max
+    max_matrix = np.tril(matrix_Max, 0)  # 下三角矩阵
+    matrix = matrix + max_matrix
+    '''max = np.max(matrix)
     row,col = np.diag_indices_from(matrix)
     matrix[row,col] = max + 1
     for i in range(length):
         for j in range(i+1):
             matrix[i][j] = max + 1
             cont += 1
-            #print('进度：{:.2%}'.format(cont / length ** 2))
+            #print('进度：{:.2%}'.format(cont / length ** 2))'''
     return matrix
 
 def write_by_k(worksheet,close1,close2,row,col):
@@ -1070,6 +1075,48 @@ def G_id(G,name):
     part_comb(G_id, 25, 'part-com-25anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
     part_comb(G_id, 30, 'part-com-30anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
 
+def G_ids(G,name,num):
+    '''图的节点按照id从零开始编号，生成一系列文件'''
+    G_un = G.to_undirected()
+    G_id = G
+    same_degree(G,name)
+    R_division(G_id, 3, name)
+    comb(G_id,num,name+'-3-rdivision.xlsx',0.5,0.5)
+    #comb(G_id,10,name+'-3-rdivision.xlsx',0.5,0.5)
+    #comb(G_id,15,name+'-3-rdivision.xlsx',0.5,0.5)
+    #comb(G_id, 20, name + '-3-rdivision.xlsx', 0.5, 0.5)
+    #comb(G_id, 25, name + '-3-rdivision.xlsx', 0.5, 0.5)
+    #comb(G_id, 30, name + '-3-rdivision.xlsx', 0.5, 0.5)
+    part(G_id,'com-'+ str(num) +'anoymous-' + name + '-3-rdivision.xlsx',num)
+    #part(G_id,'com-10anoymous-' + name + '-3-rdivision.xlsx',10)
+    #part(G_id, 'com-15anoymous-' + name + '-3-rdivision.xlsx', 15)
+    #part(G_id, 'com-20anoymous-' + name + '-3-rdivision.xlsx', 20)
+    #part(G_id, 'com-25anoymous-' + name + '-3-rdivision.xlsx', 25)
+    #part(G_id, 'com-30anoymous-' + name + '-3-rdivision.xlsx', 30)
+    part_comb(G_id,num,'part-com-'+ str(num) +'anoymous-' + name + '-3-rdivision.xlsx',0.5,0.5)
+    #part_comb(G_id,10,'part-com-10anoymous-' + name + '-3-rdivision.xlsx',0.5,0.5)
+    #part_comb(G_id, 15, 'part-com-15anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
+    #part_comb(G_id, 20, 'part-com-20anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
+    #part_comb(G_id, 25, 'part-com-25anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
+    #part_comb(G_id, 30, 'part-com-30anoymous-' + name + '-3-rdivision.xlsx', 0.5, 0.5)
+
+def sumdegree(G):
+    dicts = dict(nx.degree(G))
+    sums = 0
+    for value in dicts.values():
+        sums += value
+    return sums
+
+def graph_degree_KL(G1,file):
+    G_modify = nx.read_gml(file)
+    dict1 = dict(nx.degree(G1))
+    dict2 = dict(nx.degree(G_modify))
+    list1 = list(dict1.values())
+    list2 = list(dict2.values())
+    KL = cont_KL(list1,list2)
+    print(file+' KL = ',KL)
+
+
 if __name__ == '__main__':
     G_1 = nx.read_gml('1.gml',label=None)
     G_dol = nx.read_gml('dolphins.gml')
@@ -1108,8 +1155,40 @@ if __name__ == '__main__':
     G_face_connect = nx.convert_node_labels_to_integers(G_face_connect)
     G_Email_connect = nx.convert_node_labels_to_integers(G_Email_connect)
     G_HepTh_connect = nx.convert_node_labels_to_integers(G_HepTh_connect)
+    import torch
+    Max = 10
+    matrix = np.ones((5, 5))*Max
+    matrix_Max = np.tril(matrix,0)
+    matrix = np.random.rand(5,5)
+    a = torch.Tensor(matrix_Max)
+    b = torch.Tensor(matrix)
+    print(a)
+    print(b)
+    c = torch.add(a,b)
+
+    '''p = Pool(8)
+    p.apply_async(graph_degree_KL, args=(G_face_connect,'face-nect-conv-5-sheet2.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-5-sheet3.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-5-sheet4.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-10-sheet2.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-10-sheet3.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-10-sheet4.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-15-sheet2.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-15-sheet3.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-15-sheet4.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-20-sheet2.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-20-sheet3.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-20-sheet4.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-25-sheet2.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-25-sheet3.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-25-sheet4.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-30-sheet2.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-30-sheet3.gml'))
+    p.apply_async(graph_degree_KL, args=(G_face_connect, 'face-nect-conv-30-sheet4.gml'))
+    p.close()
+    p.join()'''
     #part_comb(G_face_connect,5,'part-com-5anoymous-face-id-convert-3-rdivision.xlsx',0.5,0.5)
-    G_id(G_face_connect,'face-id-convert')
+    #G_id(G_face_connect,'face-id-convert')
     #G_id(G_face_connect,'face-id-convert')
     #print(nx.degree(G_Email_connect,80))
     #print(nx.degree(G_face_connect,'2'))
