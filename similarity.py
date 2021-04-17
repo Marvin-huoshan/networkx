@@ -171,12 +171,13 @@ def degree_dis_plot(G,file_list):
     G_modify_15 = nx.read_gml(file_list[2])
     G_modify_20 = nx.read_gml(file_list[3])
     G_modify_25 = nx.read_gml(file_list[4])
-    dicts_1 = dict(get_degree_count(G))
-    dicts_5 = dict(get_degree_count(G_modify_5))
-    dicts_10 = dict(get_degree_count(G_modify_10))
-    dicts_15 = dict(get_degree_count(G_modify_15))
-    dicts_20 = dict(get_degree_count(G_modify_20))
-    dicts_25 = dict(get_degree_count(G_modify_25))
+    num = nx.number_of_nodes(G)
+    dicts_1 = dict(get_degree_count(G,num))
+    dicts_5 = dict(get_degree_count(G_modify_5,num))
+    dicts_10 = dict(get_degree_count(G_modify_10,num))
+    dicts_15 = dict(get_degree_count(G_modify_15,num))
+    dicts_20 = dict(get_degree_count(G_modify_20,num))
+    dicts_25 = dict(get_degree_count(G_modify_25,num))
     x_1 = list(dicts_1.keys())
     y_1 = list(dicts_1.values())
     x_5 = list(dicts_5.keys())
@@ -189,24 +190,31 @@ def degree_dis_plot(G,file_list):
     y_20 = list(dicts_20.values())
     x_25 = list(dicts_25.keys())
     y_25 = list(dicts_25.values())
+    x = [5,10,15,20,25]
+    face_y = [5050.403562,7854.694487,17863.40825,22886.27994,33115.55346,17719.63467]
+    HepTh_y = [751.9714487,914.5636706,992.1375961,1339.006074,1488.205347,2123.542722]
+    Email_y = [9740.64618,7592.988059,25536.55068,36852.44825,33729.62218,29528.95649]
     matplotlib.rc('figure', figsize=(8, 8))
-    plt.plot(x_25, y_25, color='c', linestyle='-', marker='+',label='k=25')
+    plt.plot(x_25, y_25, color='c', linestyle='-', marker='D',label='k=25')
     plt.plot(x_20, y_20, color='y', linestyle='-', marker='x',label='k=20')
     plt.plot(x_15, y_15, color='g', linestyle='-', marker='s',label='k=15')
     plt.plot(x_10, y_10, color='b', linestyle='-', marker='v',label='k=10')
     plt.plot(x_5, y_5, color='r', linestyle='-', marker='*',label='k=5')
     plt.plot(x_1, y_1, color='k', linestyle='-', marker='.',label='Origin')
-    plt.xlabel('degree')
+    plt.xlabel('Degree')
     plt.ylabel('log(n)')
     plt.legend()
+    plt.ylim(0,4)
+    #plt.yticks(my_y_ticks)
     plt.show()
 
-def get_degree_count(G):
+def get_degree_count(G,num):
     '''
     获得每个图的度值以及其对应个数
     :return:
     '''
-    degree = sorted(list(dict(nx.degree(G)).values()), reverse=False)
+    degree = sorted(list(dict(nx.degree(G)).values())[:num], reverse=False)
+    print(degree)
     degree_value = sorted(list(set(degree)))
     degree_count = list()
     for i in degree_value:
@@ -215,25 +223,41 @@ def get_degree_count(G):
     y = degree_count
     return zip(x,y)
 
+def short_path_without_addnodes(G,file_list):
+    for i in file_list:
+        G_mod = nx.read_gml(i)
+        list1 = nx.nodes(G)
+        length = len(list1)
+        list2 = list(nx.nodes(G_mod))[:length]
+        G_sub_mod = nx.subgraph(G_mod,list2)
+        print(i,':',avg_shortest_path(G_sub_mod))
+
+
 if __name__ == '__main__':
     G_kar = nx.read_gml('karate.gml', label=None, destringizer=None)
     G_1 = nx.read_gml('1.gml', label=None)
     G_HepTh = nx.read_edgelist('CA-HepTh.txt')
     G_Email = nx.read_edgelist('Email-Enron.txt')
     G_face = nx.read_edgelist('facebook_combined.txt')
+    G_cond = nx.read_edgelist('CA-CondMat.txt')
     list_HepTh = list(max(nx.connected_components(G_HepTh)))
     list_face = list(max(nx.connected_components(G_face)))
     list_Email = list(max(nx.connected_components(G_Email)))
+    list_cond = list(max(nx.connected_components(G_cond)))
     G_HepTh_connect = nx.subgraph(G_HepTh, list_HepTh)
     G_face_conect = nx.subgraph(G_face,list_face)
     G_Email_connect = nx.subgraph(G_Email,list_Email)
+    G_cond_connect = nx.subgraph(G_cond,list_cond)
     G_HepTh_connect = nx.convert_node_labels_to_integers(G_HepTh_connect)
     G_face_conect = nx.convert_node_labels_to_integers(G_face_conect)
     G_Email_connect = nx.convert_node_labels_to_integers(G_Email_connect)
+    G_cond_connect = nx.convert_node_labels_to_integers(G_cond_connect)
     G_HepPh = nx.read_edgelist('CA-HepPh.txt')
     G_HepPh = nx.convert_node_labels_to_integers(G_HepPh)
     G_kar_un = G_kar.to_undirected()
     G_1_un = G_1.to_undirected()
+    G_connect = G_HepTh_connect
+
     #G_1_anoy_1 = nx.read_gml('1-sheet1.gml')
     #G_1_anoy_2 = nx.read_gml('1-sheet2.gml')
     #G_1_anoy_3 = nx.read_gml('1-sheet3.gml')
@@ -248,6 +272,7 @@ if __name__ == '__main__':
                   'HepTh-nect-conv-20-sheet2.gml',
                   'HepTh-nect-conv-25-sheet2.gml'
                   ]
+    short_path_without_addnodes(G_HepTh_connect,HepTh_list)
     face_list = ['face-nect-conv-5-sheet2.gml',
                   'face-nect-conv-10-sheet2.gml',
                   'face-nect-conv-15-sheet2.gml',
@@ -260,10 +285,34 @@ if __name__ == '__main__':
                   'Email-nect-conv-20-sheet2.gml',
                   'Email-nect-conv-25-sheet2.gml'
                   ]
+    cond_list = ['conda-nect-conv-5-sheet2.gml',
+                 'conda-nect-conv-10-sheet2.gml',
+                 'conda-nect-conv-15-sheet2.gml',
+                 'conda-nect-conv-20-sheet2.gml',
+                 'conda-nect-conv-25-sheet2.gml'
+                 ]
     test_list = [
         'face-nect-conv-5-sheet2.gml', 'face-nect-conv-5-sheet3.gml','face-nect-conv-5-sheet4.gml'
     ]
-    degree_dis_plot(G_face_conect,face_list)
+    #degree_dis_plot(G_cond_connect,cond_list)
+
+    '''x = [5, 10, 15, 20, 25, 30]
+    face_y = [5050.403562, 7854.694487, 17863.40825, 22886.27994, 33115.55346, 17719.63467]
+    face_y = [math.log10(i) for i in face_y]
+    HepTh_y = [751.9714487, 914.5636706, 992.1375961, 1339.006074, 1488.205347, 2123.542722]
+    HepTh_y = [math.log10(i) for i in HepTh_y]
+    Email_y = [9740.64618, 7592.988059, 25536.55068, 36852.44825, 33729.62218, 29528.95649]
+    Email_y = [math.log10(i) for i in Email_y]
+    matplotlib.rc('figure', figsize=(8, 8))
+    plt.plot(x, face_y, color='b', linestyle='-', marker='v', label='Facebook')
+    plt.plot(x, HepTh_y, color='r', linestyle='-', marker='*', label='ca-HepTh')
+    plt.plot(x, Email_y, color='g', linestyle='-', marker='s', label='Enron')
+    plt.xlabel('k')
+    plt.ylabel('log(n)')
+    plt.legend()
+    plt.ylim(2.5,5)
+    # plt.yticks(my_y_ticks)
+    plt.show()'''
     #G_HepTh_5anoy2 = nx.read_gml('HepTh-nect-5-sheet2.gml')
     #G_HepTh_5anoy2 = nx.convert_node_labels_to_integers(G_HepTh_5anoy2)
     #indexs(G_HepTh_connect,'HepTh_connect_index')
@@ -271,7 +320,7 @@ if __name__ == '__main__':
     #sim(G_face,test_list,'test_conv')
     #print(nx.number_of_nodes())
     #sim(G_Email,Email_list,'G_Email_conv')
-    #sim(G_face,face_list,'G_face_conv')
+
     '''print(2*nx.number_of_edges(G_kar)/nx.number_of_nodes(G_kar))
     print(2*nx.number_of_edges(G_kar_anoy_1)/nx.number_of_nodes(G_kar_anoy_1))
     print(2 * nx.number_of_edges(G_1) / nx.number_of_nodes(G_1))
